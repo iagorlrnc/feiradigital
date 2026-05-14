@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Save, Shield, Bell, Globe, Palette, Info, Calendar, Users } from 'lucide-react'
+import { Save, Shield, Globe, Info, Calendar, Users } from 'lucide-react'
 import { useSettingsStore } from '../../store/settingsStore'
 
 export default function CeoSettingsPage() {

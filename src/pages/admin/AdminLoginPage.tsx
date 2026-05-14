@@ -12,7 +12,7 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
-  const [success, setSuccess] = useState(location.state?.message || "")
+  const [success] = useState(location.state?.message || "")
   const [isValidating, setIsValidating] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
