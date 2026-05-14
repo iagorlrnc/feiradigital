@@ -1,0 +1,196 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+    @apply bg-palmas-bg text-palmas-text;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Montserrat', sans-serif;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-palmas-blue hover:bg-palmas-dark text-white font-medium px-6 py-3 rounded-md transition-all duration-200 shadow-md hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-100 hover:bg-gray-200 text-palmas-text font-medium px-6 py-3 rounded-md transition-all duration-200 border border-gray-300;
+  }
+
+  .btn-ghost {
+    @apply hover:bg-gray-100 text-gray-700 hover:text-palmas-text font-medium px-4 py-2 rounded-md transition-all duration-200;
+  }
+
+  .card {
+    @apply bg-white border border-gray-200 rounded-3xl shadow-sm transition-all duration-300;
+  }
+
+  .input-field {
+    @apply w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-palmas-text placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-palmas-blue/5 focus:border-palmas-blue/30 transition-all duration-300 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed;
+  }
+
+  .label {
+    @apply block text-sm font-bold text-gray-700 mb-2 px-1;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full;
+  }
+
+  .section-title {
+    @apply font-display text-4xl font-bold text-palmas-text tracking-tight;
+  }
+
+  .glass {
+    @apply bg-white/80 backdrop-blur-xl border border-white/20 shadow-2xl;
+  }
+}
+
+/* Custom Utils */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-gray-200 rounded-full hover:bg-gray-300 transition-colors;
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 8s ease infinite;
+}
+
+/* Animations */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out forwards;
+}
+
+/* Leaflet map custom styles */
+.leaflet-container {
+  background: #f8f9fa !important;
+  border-radius: 1.5rem;
+}
+
+.leaflet-tile {
+  filter: none;
+}
+
+.feira-marker {
+  background: none;
+  border: none;
+}
+
+.feira-booth {
+  width: 32px;
+  height: 32px;
+  background: #0056b3;
+  border: 3px solid #004085;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 86, 179, 0.2);
+  font-size: 14px;
+}
+
+.feira-booth:hover {
+  transform: scale(1.2);
+  background: #004085;
+  box-shadow: 0 6px 20px rgba(0, 86, 179, 0.4);
+}
+
+.feira-booth.selected {
+  background: #fdb813;
+  border-color: #d39e00;
+  transform: scale(1.3);
+  box-shadow: 0 8px 24px rgba(253, 184, 19, 0.5);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+
+/* Animations */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Map placement grid */
+.booth-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
+}
+
+.booth-cell {
+  aspect-ratio: 1;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.booth-cell:hover {
+  background: rgba(0, 86, 179, 0.1);
+  border-color: #0056b3;
+}
+
+.booth-cell.occupied {
+  background: rgba(0, 86, 179, 0.3);
+  border-color: #0056b3;
+}
+
+.booth-cell.selected {
+  background: rgba(253, 184, 19, 0.3);
+  border-color: #fdb813;
+}
+
+.booth-cell.mine {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+}
