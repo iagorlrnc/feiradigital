@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef, useEffect } from "react"
-import { ZoomIn, ZoomOut, Maximize, MousePointer2, Info, LayoutGrid, Map } from "lucide-react"
+import { ZoomIn, ZoomOut, Maximize, MousePointer2, Info, LayoutGrid, Map, Flame } from "lucide-react"
 import type { Store } from "../lib/supabase"
 import { CATEGORY_ICONS } from "../lib/supabase"
 import LocationMap from "./LocationMap"
@@ -130,6 +130,7 @@ export default function FairMap({
   currentStoreId,
 }: FairMapProps) {
   const [zoom, setZoom] = useState(1)
+  const [now, setNow] = useState(new Date())
   const [mapMode, setMapMode] = useState<'blueprint' | 'real'>('real')
   const containerRef = useRef<HTMLDivElement>(null)
   
@@ -148,6 +149,12 @@ export default function FairMap({
     const targetZoom = (containerWidth * 0.95) / mapBaseSize
     const initialZoom = Math.min(Math.max(targetZoom, 0.4), 2.5)
     setZoom(initialZoom)
+  }, [])
+
+  // Keep 'now' updated for flash offer expiration checks
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(timer)
   }, [])
 
   const storeMap = useMemo(() => {
@@ -324,6 +331,12 @@ export default function FairMap({
                     cellClass += `${sector?.color} border-black/5 cursor-pointer hover:scale-125 hover:z-20 hover:shadow-xl opacity-90 hover:opacity-100`
                   }
 
+                  const isFlashActive = store?.offer_expires_at && new Date(store.offer_expires_at) > now
+
+                  if (isFlashActive) {
+                    cellClass += " ring-1 ring-orange-500 animate-pulse shadow-[0_0_20px_rgba(249,115,22,1)] z-40 scale-125 bg-orange-500 "
+                  }
+
                   return (
                     <div
                       key={`${x},${y}`}
@@ -372,7 +385,13 @@ export default function FairMap({
                 )}
               </div>
               <div className="flex-1 min-w-0 pt-2">
-                <div className="text-[10px] font-black text-palmas-blue uppercase tracking-widest mb-1">Destaque</div>
+                {selectedStore.offer_expires_at && new Date(selectedStore.offer_expires_at) > now ? (
+                  <div className="flex items-center gap-1 text-[10px] font-black text-orange-600 uppercase tracking-widest mb-1 animate-pulse">
+                    <Flame size={10} /> Oferta Ativa
+                  </div>
+                ) : (
+                  <div className="text-[10px] font-black text-palmas-blue uppercase tracking-widest mb-1">Destaque</div>
+                )}
                 <h3 className="font-bold text-gray-900 text-lg truncate leading-none mb-1">
                   {selectedStore.name}
                 </h3>

@@ -18,6 +18,12 @@ interface StoreState {
     status: Store["status"],
   ) => Promise<{ error: string | null }>
   deleteStore: (id: string) => Promise<{ error: string | null }>
+  updateFlashOffer: (
+    id: string,
+    offerExpiresAt: string | null,
+    cooldownExpiresAt: string | null
+  ) => Promise<{ error: string | null }>
+  subscribeToStores: () => () => void
 }
 
 export const useStoreStore = create<StoreState>((set) => ({
@@ -116,6 +122,48 @@ export const useStoreStore = create<StoreState>((set) => ({
             ? err.message
             : "Erro inesperado ao excluir loja",
       }
+    }
+  },
+
+  updateFlashOffer: async (id, offerExpiresAt, cooldownExpiresAt) => {
+    try {
+      const { error } = await supabase
+        .from("stores")
+        .update({
+          offer_expires_at: offerExpiresAt,
+          cooldown_expires_at: cooldownExpiresAt,
+        })
+        .eq("id", id)
+      return { error: error?.message ?? null }
+    } catch (err) {
+      return {
+        error: err instanceof Error ? err.message : "Erro ao atualizar oferta relâmpago",
+      }
+    }
+  },
+
+  subscribeToStores: () => {
+    const channel = supabase
+      .channel('stores-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'stores' },
+        (payload) => {
+          if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+            const updatedStore = payload.new as Store
+            set((state) => ({
+              stores: state.stores.map((s) =>
+                s.id === updatedStore.id ? { ...s, ...updatedStore } : s
+              ),
+              myStore: state.myStore?.id === updatedStore.id ? { ...state.myStore, ...updatedStore } : state.myStore
+            }))
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
     }
   },
 }))

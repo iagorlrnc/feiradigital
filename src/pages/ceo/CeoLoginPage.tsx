@@ -38,7 +38,7 @@ export default function CeoLoginPage() {
         clearInterval(checkProfile)
 
         if (currentUser.role !== "ceo") {
-          setError("Acesso negado. Apenas contas CEO podem acessar esta área.")
+          setError("Acesso negado. Apenas contas Dev podem acessar esta área.")
           setIsValidating(false)
           return
         }
@@ -62,7 +62,6 @@ export default function CeoLoginPage() {
     <div className="min-h-screen flex items-center justify-center p-6">
       {/* Background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-palmas-dark rounded-lg blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-green-500/5 rounded-lg blur-3xl" />
       </div>
 
@@ -73,7 +72,7 @@ export default function CeoLoginPage() {
             <Crown size={28} className="text-white" />
           </div>
           <h1 className="font-display text-3xl font-bold text-palmas-text">
-            CEO Panel
+            Dev Panel
           </h1>
           <p className="text-gray-500 text-sm mt-1">
             Acesso restrito à administração
@@ -100,7 +99,7 @@ export default function CeoLoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="input-field pl-11"
-                placeholder="ceo@feira.com"
+                placeholder="dev@feira.com"
                 required
               />
             </div>
@@ -148,7 +147,7 @@ export default function CeoLoginPage() {
         </form>
 
         <p className="text-center text-gray-500 text-xs mt-6">
-          Acesso exclusivo para administradores CEO
+          Acesso exclusivo para administradores Dev
         </p>
       </div>
     </div>

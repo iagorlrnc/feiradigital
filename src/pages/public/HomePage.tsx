@@ -11,7 +11,7 @@ import { CATEGORY_LABELS, CATEGORY_ICONS } from '../../lib/supabase'
 type ViewMode = 'grid' | 'list' | 'map'
 
 export default function HomePage() {
-  const { stores, loading, fetchActiveStores } = useStoreStore()
+  const { stores, loading, fetchActiveStores, subscribeToStores } = useStoreStore()
   const { settings, fetchSettings } = useSettingsStore()
   const [view, setView] = useState<ViewMode>('map')
   const [search, setSearch] = useState('')
@@ -22,7 +22,10 @@ export default function HomePage() {
   useEffect(() => {
     fetchActiveStores()
     fetchSettings()
-  }, [fetchActiveStores, fetchSettings])
+    
+    const unsubscribe = subscribeToStores()
+    return () => unsubscribe()
+  }, [fetchActiveStores, fetchSettings, subscribeToStores])
 
   const filtered = stores.filter(s => {
     const matchSearch = !search || s.name.toLowerCase().includes(search.toLowerCase()) ||

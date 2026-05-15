@@ -36,6 +36,8 @@ export interface Store {
   business_hours?: string
   created_at: string
   updated_at: string
+  offer_expires_at?: string
+  cooldown_expires_at?: string
   profiles?: Profile
 }
 
