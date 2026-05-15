@@ -1,7 +1,8 @@
 import { useMemo, useState, useRef, useEffect } from "react"
-import { ZoomIn, ZoomOut, Maximize, MousePointer2, Info } from "lucide-react"
+import { ZoomIn, ZoomOut, Maximize, MousePointer2, Info, LayoutGrid, Map } from "lucide-react"
 import type { Store } from "../lib/supabase"
 import { CATEGORY_ICONS } from "../lib/supabase"
+import LocationMap from "./LocationMap"
 
 interface FairMapProps {
   stores: Store[]
@@ -129,6 +130,7 @@ export default function FairMap({
   currentStoreId,
 }: FairMapProps) {
   const [zoom, setZoom] = useState(1)
+  const [mapMode, setMapMode] = useState<'blueprint' | 'real'>('real')
   const containerRef = useRef<HTMLDivElement>(null)
   
   const [isDragging, setIsDragging] = useState(false)
@@ -213,6 +215,32 @@ export default function FairMap({
 
   return (
     <div className="flex flex-col h-[600px] relative w-full overflow-hidden">
+      {/* View Switcher */}
+      <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20 flex p-1 bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border border-white/50">
+        <button 
+          onClick={() => setMapMode('blueprint')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            mapMode === 'blueprint' ? 'bg-palmas-blue text-white shadow-lg' : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          <LayoutGrid size={14} /> Esquema
+        </button>
+        <button 
+          onClick={() => setMapMode('real')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            mapMode === 'real' ? 'bg-palmas-blue text-white shadow-lg' : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          <Map size={14} /> Real
+        </button>
+      </div>
+
+      {mapMode === 'real' ? (
+        <div className="flex-1 animate-fade-in">
+          <LocationMap />
+        </div>
+      ) : (
+        <>
       {/* Zoom Controls */}
       <div className="absolute top-6 right-6 z-10 flex flex-col gap-1 bg-white/90 backdrop-blur-md p-1.5 rounded-2xl shadow-2xl border border-white/50">
         <button onClick={() => setZoom(prev => Math.min(prev + 0.25, 3))} className="p-2.5 hover:bg-gray-100 rounded-xl text-gray-700 transition-all active:scale-95">
@@ -359,6 +387,8 @@ export default function FairMap({
             </button>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   )

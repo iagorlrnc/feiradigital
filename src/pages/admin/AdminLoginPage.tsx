@@ -43,10 +43,10 @@ export default function AdminLoginPage() {
 
         if (currentUser.role === "ceo") {
           // Redirecionar para CEO
-          window.location.href = getSubdomainUrl("ceo", "/ceo/dashboard")
+          window.location.href = getSubdomainUrl("dev", "/dashboard")
         } else {
           // Admin ou user - ficar no admin
-          navigate("/admin/dashboard")
+          navigate("/dashboard")
         }
         return
       }
@@ -183,7 +183,7 @@ export default function AdminLoginPage() {
           <p className="text-center text-gray-500 text-sm mt-6">
             Ainda não tem conta?{" "}
             <Link
-              to="/admin/register"
+              to="/register"
               className="text-palmas-blue hover:text-palmas-dark font-medium"
             >
               Cadastrar loja

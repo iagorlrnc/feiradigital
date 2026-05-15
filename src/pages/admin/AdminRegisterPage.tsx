@@ -91,10 +91,10 @@ export default function AdminRegisterPage() {
 
       // Se chegamos aqui, os dados foram enviados com sucesso
       if (result.data?.session) {
-        navigate("/admin/dashboard")
+        navigate("/dashboard")
       } else {
         // Redireciona para login informando que deu certo
-        navigate("/admin/login", { 
+        navigate("/", { 
           state: { message: "Cadastro realizado com sucesso! Faça login para continuar." } 
         })
       }
@@ -344,7 +344,7 @@ export default function AdminRegisterPage() {
         <p className="text-center text-gray-500 text-sm mt-6">
           Já tem conta?{" "}
           <Link
-            to="/admin/login"
+            to="/"
             className="text-palmas-blue hover:text-palmas-dark font-medium"
           >
             Entrar

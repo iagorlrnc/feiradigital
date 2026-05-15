@@ -12,7 +12,7 @@ export default function CeoLayout() {
 
   const handleSignOut = async () => {
     await signOut()
-    window.location.href = '/ceo/login'
+    window.location.href = '/'
   }
 
   if (isAuthPage) {
@@ -24,11 +24,11 @@ export default function CeoLayout() {
   }
 
   const navItems = [
-    { to: '/ceo/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/ceo/stores', icon: Store, label: 'Lojas' },
-    { to: '/ceo/map', icon: Map, label: 'Mapa da Feira' },
-    { to: '/ceo/accounts', icon: Users, label: 'Contas Admin' },
-    { to: '/ceo/settings', icon: Crown, label: 'Configurações' },
+    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/stores', icon: Store, label: 'Lojas' },
+    { to: '/map', icon: Map, label: 'Mapa da Feira' },
+    { to: '/accounts', icon: Users, label: 'Contas Admin' },
+    { to: '/settings', icon: Crown, label: 'Configurações' },
   ]
 
   return (

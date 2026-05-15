@@ -69,7 +69,7 @@ export default function AdminStorePage() {
 
   useEffect(() => {
     if (!user) {
-      navigate("/admin/login")
+      navigate("/")
       return
     }
     fetchMyStore(user.id)

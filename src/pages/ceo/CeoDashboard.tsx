@@ -130,21 +130,21 @@ export default function CeoDashboard() {
           <div className="grid sm:grid-cols-2 gap-4">
             {[
               {
-                to: "/ceo/stores",
+                to: "/dev/stores",
                 icon: Store,
                 label: "Gerenciar lojas",
                 desc: "Aprovar, suspender, editar",
                 color: "feira",
               },
               {
-                to: "/ceo/map",
+                to: "/map",
                 icon: Map,
                 label: "Mapa da feira",
                 desc: "Visualizar ocupação",
                 color: "sage",
               },
               {
-                to: "/ceo/accounts",
+                to: "/accounts",
                 icon: Users,
                 label: "Contas admin",
                 desc: "Controlar acessos",
@@ -190,7 +190,7 @@ export default function CeoDashboard() {
                 </div>
               </div>
               <Link
-                to="/ceo/stores"
+                to="/stores"
                 className="btn-primary py-2 px-4 text-xs font-bold"
               >
                 Analisar
@@ -207,7 +207,7 @@ export default function CeoDashboard() {
             🆕 Lojas Recentes
           </h2>
           <Link
-            to="/ceo/stores"
+            to="/stores"
             className="text-xs font-bold text-palmas-blue hover:underline flex items-center gap-1"
           >
             Ver catálogo completo <ArrowRight size={12} />

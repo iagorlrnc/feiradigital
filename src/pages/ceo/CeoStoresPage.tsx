@@ -35,9 +35,18 @@ export default function CeoStoresPage() {
   }
 
   async function handleDelete(id: string) {
-    await deleteStore(id)
-    setConfirmDelete(null)
-    fetchAllStores()
+    try {
+      const { error } = await deleteStore(id)
+      if (error) throw new Error(error)
+      
+      alert('Loja excluída com sucesso!')
+      setConfirmDelete(null)
+      fetchAllStores()
+    } catch (err) {
+      console.error('Error deleting store:', err)
+      alert('Erro ao excluir loja. Verifique suas permissões.')
+      setConfirmDelete(null)
+    }
   }
 
   const counts = {

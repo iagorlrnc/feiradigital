@@ -1,4 +1,4 @@
-export function getSubdomain(): "admin" | "ceo" | "public" {
+export function getSubdomain(): "admin" | "dev" | "public" {
   const host = window.location.hostname
 
   // Check for subdomain (works in both production and localhost)
@@ -7,20 +7,20 @@ export function getSubdomain(): "admin" | "ceo" | "public" {
     if (parts.length >= 2) {
       const subdomain = parts[0].toLowerCase()
       if (subdomain === "admin") return "admin"
-      if (subdomain === "ceo") return "ceo"
+      if (subdomain === "dev") return "dev"
     }
   }
 
   // Dev fallback via path prefix
   const path = window.location.pathname
   if (path.startsWith("/admin")) return "admin"
-  if (path.startsWith("/ceo")) return "ceo"
+  if (path.startsWith("/dev")) return "dev"
 
   return "public"
 }
 
 export function getSubdomainUrl(
-  targetSubdomain: "admin" | "ceo" | "public",
+  targetSubdomain: "admin" | "dev" | "public",
   path: string = "/",
 ): string {
   const host = window.location.hostname
@@ -32,8 +32,8 @@ export function getSubdomainUrl(
   let rootDomain = host
   if (host.startsWith("admin.")) {
     rootDomain = host.replace("admin.", "")
-  } else if (host.startsWith("ceo.")) {
-    rootDomain = host.replace("ceo.", "")
+  } else if (host.startsWith("dev.")) {
+    rootDomain = host.replace("dev.", "")
   }
 
   // If public, we just want the root domain without admin/ceo subdomains

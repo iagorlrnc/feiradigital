@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Store, AlertCircle, CheckCircle, Clock, ArrowRight, Phone, Instagram } from 'lucide-react'
+import { Store, AlertCircle, CheckCircle, Clock, ArrowRight, Phone, Instagram, Circle } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { useStoreStore } from '../../store/storeStore'
 import { CATEGORY_ICONS } from '../../lib/supabase'
@@ -11,7 +11,7 @@ export default function AdminDashboard() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!user) { navigate('/admin/login'); return }
+    if (!user) { navigate('/'); return }
     fetchMyStore(user.id)
   }, [user, fetchMyStore, navigate])
 
@@ -22,6 +22,16 @@ export default function AdminDashboard() {
   }
 
   const status = myStore ? statusConfig[myStore.status] : null
+  
+  const checklist = [
+    { label: 'Banner da banca', value: !!myStore?.banner_url },
+    { label: 'Logotipo/Ícone', value: !!myStore?.logo_url },
+    { label: 'Redes sociais', value: !!myStore?.instagram },
+    { label: 'Contato WhatsApp', value: !!myStore?.phone },
+    { label: 'Descrição da banca', value: !!myStore?.description },
+  ]
+  const completedItems = checklist.filter(item => item.value).length
+  const percentage = Math.round((completedItems / checklist.length) * 100)
 
   return (
     <div className="max-w-2xl mx-auto animate-fade-in">
@@ -45,7 +55,7 @@ export default function AdminDashboard() {
           <p className="text-gray-500 text-sm mb-8 max-w-xs mx-auto leading-relaxed">
             Configure sua loja digital para ficar visível para milhares de visitantes da feira.
           </p>
-          <Link to="/admin/store" className="btn-primary inline-flex items-center gap-2 px-8 py-3">
+          <Link to="/store" className="btn-primary inline-flex items-center gap-2 px-8 py-3">
             <Store size={18} />
             Criar minha banca
           </Link>
@@ -120,22 +130,43 @@ export default function AdminDashboard() {
 
             {/* QR Code / Quick Tools */}
             <div className="space-y-4">
-              <div className="card p-6 bg-gradient-to-br from-gray-50 to-white flex flex-col items-center text-center">
-                <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-4 group cursor-pointer">
-                  <div className="w-28 h-28 bg-gray-100 rounded flex items-center justify-center border-2 border-dashed border-gray-300 relative">
-                    <div className="font-mono text-[8px] text-gray-400">QR CODE MOCKUP</div>
-                    <div className="absolute inset-0 flex items-center justify-center bg-white/80 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <ArrowRight size={24} className="text-palmas-blue" />
-                    </div>
-                  </div>
+              <div className="card p-6 bg-white border-2 border-palmas-blue/10 flex flex-col">
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="font-bold text-gray-800 text-sm">Perfil de Visibilidade</h4>
+                  <span className="text-[10px] font-bold px-2 py-1 bg-palmas-blue/10 text-palmas-blue rounded-full">
+                    {percentage}%
+                  </span>
                 </div>
-                <h4 className="font-bold text-gray-800 text-sm">Divulgue sua banca</h4>
-                <p className="text-[11px] text-gray-500 mt-1 mb-4">Imprima seu QR Code e coloque na sua banca física para os clientes te seguirem.</p>
-                <button className="btn-secondary w-full py-2 text-xs font-bold border-2">Baixar QR Code</button>
+                
+                <div className="w-full h-1.5 bg-gray-100 rounded-full mb-6 overflow-hidden">
+                  <div 
+                    className="h-full bg-palmas-blue transition-all duration-1000" 
+                    style={{ width: `${percentage}%` }}
+                  />
+                </div>
+
+                <div className="space-y-3 mb-6 flex-1">
+                  {checklist.map((item, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      {item.value ? (
+                        <CheckCircle size={14} className="text-green-500" />
+                      ) : (
+                        <Circle size={14} className="text-gray-300" />
+                      )}
+                      <span className={`text-[11px] ${item.value ? 'text-gray-500 line-through' : 'text-gray-700 font-medium'}`}>
+                        {item.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <Link to="/store" className="btn-secondary w-full py-2 text-xs font-bold border-2 text-center hover:bg-palmas-blue hover:text-white transition-colors">
+                  Otimizar meu perfil
+                </Link>
               </div>
 
               <Link
-                to="/admin/store"
+                to="/store"
                 className="flex items-center justify-between p-5 card hover:bg-palmas-blue group hover:border-palmas-blue transition-all"
               >
                 <div className="flex items-center gap-4">

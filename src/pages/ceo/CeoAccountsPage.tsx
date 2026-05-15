@@ -22,11 +22,18 @@ export default function CeoAccountsPage() {
   useEffect(() => { fetchAccounts() }, [])
 
   async function handleDelete(id: string) {
-    // In production: call Supabase admin API
-    // For demo: just remove from profiles
-    await supabase.from('profiles').delete().eq('id', id)
-    setConfirmDelete(null)
-    fetchAccounts()
+    try {
+      const { error } = await supabase.from('profiles').delete().eq('id', id)
+      if (error) throw error
+      
+      alert('Conta removida com sucesso!')
+      setConfirmDelete(null)
+      fetchAccounts()
+    } catch (err) {
+      console.error('Error deleting account:', err)
+      alert('Erro ao excluir conta. Verifique se você tem permissões de CEO.')
+      setConfirmDelete(null)
+    }
   }
 
   const filtered = accounts.filter(a =>

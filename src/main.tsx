@@ -32,105 +32,82 @@ import CeoSettingsPage from "./pages/ceo/CeoSettingsPage"
 import { useAuthStore } from "./store/authStore"
 
 // Lib
-import { getSubdomain, getSubdomainUrl } from "./lib/subdomain"
-
-// ─── Helper Components ────────────────────────────────────────────────────────
-
-// Redirects from the root domain based on subdomain
-function RootPage() {
-  const subdomain = getSubdomain()
-
-  if (subdomain === "admin") {
-    return <Navigate to="/admin/dashboard" replace />
-  }
-  if (subdomain === "ceo") {
-    return <Navigate to="/ceo/dashboard" replace />
-  }
-
-  return <HomePage />
-}
-
-// Protected route component that validates subdomain access
-function SubdomainGuard({ children }: { children: React.ReactNode }) {
-  const { user, initialized } = useAuthStore()
-  const currentSubdomain = getSubdomain()
-
-  useEffect(() => {
-    if (!initialized) return
-
-    // If on admin subdomain, CEOs are allowed (superusers), no redirect needed.
-
-    // If on CEO subdomain, only allow CEO role
-    if (currentSubdomain === "ceo") {
-      if (user && user.role !== "ceo") {
-        window.location.href = getSubdomainUrl("admin", "/admin/dashboard")
-        return
-      }
-    }
-  }, [user, initialized, currentSubdomain])
-
-  if (!initialized) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Carregando...
-      </div>
-    )
-  }
-
-  return <>{children}</>
-}
+import { getSubdomain } from "./lib/subdomain"
 
 function AppRoutes() {
-  const { init } = useAuthStore()
+  const { init, user, initialized } = useAuthStore()
+  const subdomain = getSubdomain()
 
   useEffect(() => {
     init()
   }, [init])
 
+  if (!initialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-palmas-bg">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-palmas-blue/20 border-t-palmas-blue rounded-full animate-spin" />
+          <p className="text-palmas-text font-medium animate-pulse">Carregando...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // ─── ADMIN SUBDOMAIN ───
+  if (subdomain === "admin") {
+    return (
+      <BrowserRouter>
+        <Routes>
+          {!user ? (
+            <>
+              <Route path="/register" element={<AdminRegisterPage />} />
+              <Route path="*" element={<AdminLoginPage />} />
+            </>
+          ) : (
+            <Route element={<AdminLayout />}>
+              <Route index element={<Navigate to="/dashboard" replace />} />
+              <Route path="/dashboard" element={<AdminDashboard />} />
+              <Route path="/store" element={<AdminStorePage />} />
+              <Route path="/hours" element={<AdminHoursPage />} />
+              <Route path="/plans" element={<AdminPlansPage />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Route>
+          )}
+        </Routes>
+      </BrowserRouter>
+    )
+  }
+
+  // ─── CEO (DEV) SUBDOMAIN ───
+  if (subdomain === "dev") {
+    return (
+      <BrowserRouter>
+        <Routes>
+          {!user || user.role !== "ceo" ? (
+            <Route path="*" element={<CeoLoginPage />} />
+          ) : (
+            <Route element={<CeoLayout />}>
+              <Route index element={<Navigate to="/dashboard" replace />} />
+              <Route path="/dashboard" element={<CeoDashboard />} />
+              <Route path="/stores" element={<CeoStoresPage />} />
+              <Route path="/map" element={<CeoMapPage />} />
+              <Route path="/accounts" element={<CeoAccountsPage />} />
+              <Route path="/settings" element={<CeoSettingsPage />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Route>
+          )}
+        </Routes>
+      </BrowserRouter>
+    )
+  }
+
+  // ─── PUBLIC DOMAIN ───
   return (
     <BrowserRouter>
       <Routes>
-        {/* ── Root (redirects based on subdomain) ── */}
         <Route path="/" element={<PublicLayout />}>
-          <Route index element={<RootPage />} />
+          <Route index element={<HomePage />} />
         </Route>
-
-        {/* ── Admin (admin. subdomain or /admin prefix in dev) ── */}
-        <Route
-          path="/admin/*"
-          element={
-            <SubdomainGuard>
-              <AdminLayout />
-            </SubdomainGuard>
-          }
-        >
-          <Route index element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="login" element={<AdminLoginPage />} />
-          <Route path="register" element={<AdminRegisterPage />} />
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="store" element={<AdminStorePage />} />
-          <Route path="hours" element={<AdminHoursPage />} />
-          <Route path="plans" element={<AdminPlansPage />} />
-        </Route>
-
-        {/* ── CEO (ceo. subdomain or /ceo prefix in dev) ── */}
-        <Route
-          path="/ceo/*"
-          element={
-            <SubdomainGuard>
-              <CeoLayout />
-            </SubdomainGuard>
-          }
-        >
-          <Route index element={<Navigate to="/ceo/dashboard" replace />} />
-          <Route path="login" element={<CeoLoginPage />} />
-          <Route path="dashboard" element={<CeoDashboard />} />
-          <Route path="stores" element={<CeoStoresPage />} />
-          <Route path="map" element={<CeoMapPage />} />
-          <Route path="accounts" element={<CeoAccountsPage />} />
-          <Route path="settings" element={<CeoSettingsPage />} />
-        </Route>
-
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

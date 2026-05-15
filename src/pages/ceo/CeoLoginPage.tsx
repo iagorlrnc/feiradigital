@@ -45,7 +45,7 @@ export default function CeoLoginPage() {
 
         // Login bem-sucedido e role correto
         setIsValidating(false)
-        navigate("/ceo/dashboard")
+        navigate("/dashboard")
         return
       }
 

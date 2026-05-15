@@ -12,7 +12,7 @@ export default function AdminLayout() {
 
   const handleSignOut = async () => {
     await signOut()
-    window.location.href = '/admin/login'
+    window.location.href = '/'
   }
 
   if (isAuthPage) {
@@ -48,7 +48,7 @@ export default function AdminLayout() {
         {/* Nav */}
         <nav className="flex-1 p-4 space-y-1">
           <NavLink
-            to="/admin/dashboard"
+            to="/dashboard"
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-all ${
                 isActive
@@ -61,7 +61,7 @@ export default function AdminLayout() {
             Dashboard
           </NavLink>
           <NavLink
-            to="/admin/store"
+            to="/store"
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-all ${
                 isActive
@@ -74,7 +74,7 @@ export default function AdminLayout() {
             Minha Loja
           </NavLink>
           <NavLink
-            to="/admin/hours"
+            to="/hours"
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-all ${
                 isActive
@@ -87,7 +87,7 @@ export default function AdminLayout() {
             Horário
           </NavLink>
           <NavLink
-            to="/admin/plans"
+            to="/plans"
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-all ${
                 isActive

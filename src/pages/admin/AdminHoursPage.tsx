@@ -41,7 +41,7 @@ export default function AdminHoursPage() {
 
   useEffect(() => {
     if (!user) {
-      navigate("/admin/login")
+      navigate("/")
       return
     }
     fetchMyStore(user.id)
@@ -112,7 +112,7 @@ export default function AdminHoursPage() {
         <p className="text-gray-500 max-w-sm mb-6">
           Você precisa configurar as informações básicas da sua loja antes de definir os horários.
         </p>
-        <button onClick={() => navigate("/admin/store")} className="btn-primary">
+        <button onClick={() => navigate("/store")} className="btn-primary">
           Ir para Minha Loja
         </button>
       </div>
