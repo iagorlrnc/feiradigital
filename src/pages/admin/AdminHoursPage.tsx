@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Clock, Save, AlertCircle, CheckCircle, Calendar, ArrowRight } from "lucide-react"
+import { Clock, Save, AlertCircle, CheckCircle, Calendar, ArrowRight, Store } from "lucide-react"
 import { useAuthStore } from "../../store/authStore"
 import { useStoreStore } from "../../store/storeStore"
 
@@ -30,7 +30,9 @@ const DEFAULT_HOURS: DayHours[] = DAYS_OF_WEEK.map(day => ({
 
 export default function AdminHoursPage() {
   const { user } = useAuthStore()
-  const { myStore, fetchMyStore, updateStore } = useStoreStore()
+  const { myStores, activeStoreId, setActiveStoreId, fetchMyStore, updateStore } = useStoreStore()
+  
+  const myStore = myStores.find(s => s.id === activeStoreId) || null
   const navigate = useNavigate()
 
   const [hoursList, setHoursList] = useState<DayHours[]>(DEFAULT_HOURS)
@@ -62,7 +64,7 @@ export default function AdminHoursPage() {
         setIsEditing(true)
       }
     }
-  }, [myStore])
+  }, [myStore, activeStoreId])
 
   const handleToggleDay = (index: number) => {
     if (!isEditing) return
@@ -124,17 +126,42 @@ export default function AdminHoursPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="font-display text-3xl font-bold text-palmas-text">Horário de Funcionamento</h1>
-          <p className="text-gray-500 mt-1 text-sm">Organize os dias e turnos de atendimento ao público</p>
+          <p className="text-gray-500 mt-1">Defina quando sua banca estará aberta para o público</p>
         </div>
-        {!isEditing && (
+        {myStore && (
           <button
-            onClick={() => setIsEditing(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-palmas-blue text-white rounded-2xl text-sm font-bold shadow-lg shadow-palmas-blue/20 hover:-translate-y-0.5 transition-all"
+            onClick={() => setIsEditing(!isEditing)}
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${
+              isEditing 
+                ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' 
+                : 'bg-palmas-blue text-white shadow-lg shadow-palmas-blue/20 hover:-translate-y-0.5'
+            }`}
           >
-            Editar Horários
+            {isEditing ? 'Cancelar' : 'Editar Horários'}
           </button>
         )}
       </div>
+
+      {/* Store Selector (Loja 1, Loja 2) */}
+      {myStores.length > 1 && (
+        <div className="flex gap-2 mb-8 p-1 bg-white rounded-2xl border border-gray-100 shadow-sm">
+          {myStores.map((s, index) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => setActiveStoreId(s.id)}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all ${
+                activeStoreId === s.id
+                  ? "bg-palmas-dark text-white shadow-lg"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              <Store size={16} />
+              Loja {index + 1}
+            </button>
+          ))}
+        </div>
+      )}
 
       {error && (
         <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm mb-6 animate-scale-in">

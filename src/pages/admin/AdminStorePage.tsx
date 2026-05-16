@@ -36,13 +36,18 @@ function posToLabel(x: number, y: number) {
 export default function AdminStorePage() {
   const { user } = useAuthStore()
   const {
-    myStore,
+    myStores,
+    activeStoreId,
     stores,
     fetchMyStore,
-    fetchActiveStores,
+    fetchAllStores,
     createStore,
     updateStore,
+    setActiveStoreId,
+    resetActiveStoreId,
   } = useStoreStore()
+  
+  const myStore = myStores.find(s => s.id === activeStoreId) || null
   const navigate = useNavigate()
 
   const [form, setForm] = useState({
@@ -79,7 +84,7 @@ export default function AdminStorePage() {
       return
     }
     fetchMyStore(user.id)
-    fetchActiveStores()
+    fetchAllStores()
   }, [user])
 
   useEffect(() => {
@@ -102,9 +107,26 @@ export default function AdminStorePage() {
       setEditingPos({ x: myStore.booth_x, y: myStore.booth_y })
       setIsEditing(false)
     } else {
+      // Clear form for new store
+      setForm({
+        name: "",
+        description: "",
+        category: "outros",
+        phone: "",
+        instagram: "",
+        whatsapp: "",
+        logo_url: "",
+        banner_url: "",
+        booth_x: 0,
+        booth_y: 0,
+        booth_label: "A1",
+        is_featured: false,
+        gallery: [],
+      })
+      setEditingPos(null)
       setIsEditing(true)
     }
-  }, [myStore])
+  }, [myStore, activeStoreId])
 
   function update(field: string, value: string | number | boolean | string[]) {
     if (!isEditing) return
@@ -216,6 +238,12 @@ export default function AdminStorePage() {
     setError("")
   }
 
+  function handleMapSelectStore(store: any) {
+    if (store && myStores.some(s => s.id === store.id)) {
+      setActiveStoreId(store.id)
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!user) {
@@ -266,7 +294,7 @@ export default function AdminStorePage() {
 
       // Fetch fresh data but don't let it block the UI if it's slow
       fetchMyStore(user.id).catch(console.error)
-      fetchActiveStores().catch(console.error)
+      fetchAllStores().catch(console.error)
 
       setTimeout(() => setSuccess(false), 3000)
     } catch (err) {
@@ -276,8 +304,6 @@ export default function AdminStorePage() {
       setSaving(false)
     }
   }
-
-  const otherStores = stores.filter((s) => s.id !== myStore?.id)
 
   return (
     <div className={`${activeTab === 'map' ? 'max-w-5xl' : 'max-w-2xl'} mx-auto animate-fade-in transition-all duration-500`}>
@@ -304,6 +330,44 @@ export default function AdminStorePage() {
           </button>
         )}
       </div>
+
+      {/* Store Selector (Loja 1, Loja 2) */}
+      {(myStores.length > 0 || !activeStoreId) && (
+        <div className="flex gap-2 mb-4 p-1 bg-white rounded-2xl border border-gray-100 shadow-sm mt-8">
+          {myStores.map((s, index) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => setActiveStoreId(s.id)}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all ${
+                activeStoreId === s.id
+                  ? "bg-palmas-dark text-white shadow-lg"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              <Store size={16} />
+              Loja {index + 1}
+            </button>
+          ))}
+          {myStores.length < 2 && (
+            <button
+              type="button"
+              onClick={() => {
+                resetActiveStoreId()
+                setActiveTab('info')
+              }}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all ${
+                !activeStoreId
+                  ? "bg-palmas-blue text-white shadow-lg"
+                  : "text-gray-400 border border-dashed border-gray-200 hover:bg-gray-50"
+              }`}
+            >
+              <Plus size={16} />
+              Nova Loja
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-1 p-1 bg-white rounded-2xl border border-gray-100 mb-8 shadow-sm">
@@ -588,11 +652,14 @@ export default function AdminStorePage() {
             </div>
 
             <FairMap
-              stores={otherStores}
+              key={activeStoreId || 'new'}
+              stores={stores}
               editable={isEditing}
               editingPosition={editingPos}
               onSelectPosition={handleSelectPosition}
               currentStoreId={myStore?.id}
+              myStoreIds={myStores.map(s => s.id)}
+              onSelectStore={handleMapSelectStore}
             />
           </div>
         )}

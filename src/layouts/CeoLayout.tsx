@@ -39,7 +39,7 @@ export default function CeoLayout() {
         bg-gradient-to-b from-gray-200 to-gray-200 border-r border-gray-200
         transform transition-transform duration-300
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:static lg:z-auto
+        lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:z-auto overflow-y-auto
       `}>
         {/* Logo */}
         <div className="p-6 border-b border-gray-200">

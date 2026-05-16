@@ -13,6 +13,7 @@ interface FairMapProps {
   onSelectPosition?: (x: number, y: number) => void
   occupiedPositions?: { x: number; y: number; storeId: string }[]
   currentStoreId?: string
+  myStoreIds?: string[]
 }
 
 const GRID_COLS = 30
@@ -128,6 +129,7 @@ export default function FairMap({
   editingPosition,
   onSelectPosition,
   currentStoreId,
+  myStoreIds = [],
 }: FairMapProps) {
   const [zoom, setZoom] = useState(1)
   const [now, setNow] = useState(new Date())
@@ -203,6 +205,7 @@ export default function FairMap({
     const store = storeMap[`${x},${y}`]
     if (store) {
       if (store.id === currentStoreId) return "mine"
+      if (myStoreIds.includes(store.id)) return "my-other-store"
       if (store.id === selectedStore?.id) return "selected"
       return "occupied"
     }
@@ -353,6 +356,8 @@ export default function FairMap({
                     cellClass += "bg-black text-white border-black z-10 scale-125 shadow-2xl ring-4 ring-green-500/30 cursor-pointer"
                   } else if (state === "selected") {
                     cellClass += "bg-black text-white border-black z-10 scale-150 shadow-2xl ring-4 ring-palmas-blue/30 cursor-pointer"
+                  } else if (state === "my-other-store") {
+                    cellClass += "bg-gray-800 text-white border-gray-800 z-10 scale-110 shadow-lg ring-2 ring-gray-400/30 cursor-pointer"
                   } else if (state === "occupied") {
                     cellClass += "bg-black/90 hover:bg-black text-white border-black/90 cursor-pointer shadow-lg hover:scale-125 hover:z-20 z-10"
                   } else if (state === "editing") {

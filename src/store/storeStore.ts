@@ -3,10 +3,13 @@ import { supabase, type Store } from "../lib/supabase"
 
 interface StoreState {
   stores: Store[]
-  myStore: Store | null
+  myStores: Store[]
+  activeStoreId: string | null
   loading: boolean
   fetchActiveStores: () => Promise<void>
   fetchMyStore: (ownerId: string) => Promise<void>
+  setActiveStoreId: (id: string) => void
+  resetActiveStoreId: () => void
   fetchAllStores: () => Promise<void>
   createStore: (data: Partial<Store>) => Promise<{ error: string | null }>
   updateStore: (
@@ -26,9 +29,10 @@ interface StoreState {
   subscribeToStores: () => () => void
 }
 
-export const useStoreStore = create<StoreState>((set) => ({
+export const useStoreStore = create<StoreState>((set, get) => ({
   stores: [],
-  myStore: null,
+  myStores: [],
+  activeStoreId: null,
   loading: false,
 
   fetchActiveStores: async () => {
@@ -54,12 +58,32 @@ export const useStoreStore = create<StoreState>((set) => ({
         .from("stores")
         .select("*")
         .eq("owner_id", ownerId)
-        .single()
-      if (error && error.code !== 'PGRST116') throw error // PGRST116 is 'no rows returned'
-      set({ myStore: data ?? null })
+      
+      if (error) throw error
+      
+      const stores = data ?? []
+      set({ myStores: stores })
+      
+      // Default to first store if none selected or current selection no longer exists
+      const currentActiveId = get().activeStoreId
+      if (stores.length > 0) {
+        if (!currentActiveId || !stores.find(s => s.id === currentActiveId)) {
+          set({ activeStoreId: stores[0].id })
+        }
+      } else {
+        set({ activeStoreId: null })
+      }
     } catch (err) {
-      console.error("Error fetching my store:", err)
+      console.error("Error fetching my stores:", err)
     }
+  },
+
+  setActiveStoreId: (id: string) => {
+    set({ activeStoreId: id })
+  },
+
+  resetActiveStoreId: () => {
+    set({ activeStoreId: null })
   },
 
   fetchAllStores: async () => {
@@ -77,8 +101,17 @@ export const useStoreStore = create<StoreState>((set) => ({
 
   createStore: async (storeData) => {
     try {
-      const { error } = await supabase.from("stores").insert([storeData])
-      return { error: error?.message ?? null }
+      const { data, error } = await supabase.from("stores").insert([storeData]).select().single()
+      if (error) throw error
+      
+      if (data) {
+        set((state) => ({ 
+          myStores: [...state.myStores, data],
+          activeStoreId: data.id 
+        }))
+      }
+      
+      return { error: null }
     } catch (err) {
       return {
         error: err instanceof Error ? err.message : "Erro inesperado ao criar loja",
@@ -155,7 +188,9 @@ export const useStoreStore = create<StoreState>((set) => ({
               stores: state.stores.map((s) =>
                 s.id === updatedStore.id ? { ...s, ...updatedStore } : s
               ),
-              myStore: state.myStore?.id === updatedStore.id ? { ...state.myStore, ...updatedStore } : state.myStore
+              myStores: state.myStores.map((s) =>
+                s.id === updatedStore.id ? { ...s, ...updatedStore } : s
+              )
             }))
           }
         }

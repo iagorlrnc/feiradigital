@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, MapPin, Phone, Instagram, MessageCircle, Tag, ExternalLink, Clock } from 'lucide-react'
+import { X, MapPin, Phone, Instagram, MessageCircle, Tag, ExternalLink, Clock, Image } from 'lucide-react'
 import type { Store } from '../lib/supabase'
 import { CATEGORY_ICONS, CATEGORY_LABELS } from '../lib/supabase'
 import { getStoreStatus } from '../lib/hours'
@@ -11,6 +11,7 @@ interface StoreModalProps {
 
 export default function StoreModal({ store, onClose }: StoreModalProps) {
   const [showHours, setShowHours] = useState(false)
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
   
   if (!store) return null
 
@@ -116,6 +117,52 @@ export default function StoreModal({ store, onClose }: StoreModalProps) {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Gallery */}
+          {store.gallery && store.gallery.length > 0 && (
+            <div className="mt-8">
+              <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-1.5">
+                <Image size={10} className="text-palmas-blue" /> Galeria de Fotos
+              </h4>
+              <div className="flex gap-3 overflow-x-auto pb-4 custom-scrollbar snap-x no-scrollbar">
+                {store.gallery.map((url, i) => (
+                  <div 
+                    key={i} 
+                    className="w-32 h-32 rounded-2xl overflow-hidden flex-shrink-0 shadow-sm border border-gray-100 snap-start group relative"
+                  >
+                    <img src={url} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                    <button 
+                      onClick={() => setSelectedImage(url)}
+                      className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold"
+                    >
+                      Ver foto
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Image Lightbox */}
+          {selectedImage && (
+            <div 
+              className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-fade-in"
+              onClick={() => setSelectedImage(null)}
+            >
+              <button 
+                className="absolute top-6 right-6 text-white hover:text-gray-300 p-2"
+                onClick={() => setSelectedImage(null)}
+              >
+                <X size={32} />
+              </button>
+              <img 
+                src={selectedImage} 
+                alt="" 
+                className="max-w-full max-h-[90vh] rounded-2xl shadow-2xl animate-scale-in object-contain"
+                onClick={e => e.stopPropagation()}
+              />
             </div>
           )}
 

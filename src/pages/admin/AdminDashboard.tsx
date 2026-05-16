@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Store, AlertCircle, CheckCircle, Clock, ArrowRight, Phone, Instagram, Flame, Timer, Zap, Lock } from 'lucide-react'
+import { Store, AlertCircle, CheckCircle, Clock, ArrowRight, Phone, Instagram, Flame, Timer, Zap, Lock, Loader2, Plus, Image, X } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { useStoreStore } from '../../store/storeStore'
 import { CATEGORY_ICONS } from '../../lib/supabase'
 
 export default function AdminDashboard() {
   const { user } = useAuthStore()
-  const { myStore, fetchMyStore, updateFlashOffer, subscribeToStores } = useStoreStore()
+  const { myStores, activeStoreId, setActiveStoreId, resetActiveStoreId, fetchMyStore, updateFlashOffer, subscribeToStores } = useStoreStore()
+  
+  const myStore = myStores.find(s => s.id === activeStoreId) || null
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -27,17 +29,25 @@ export default function AdminDashboard() {
     suspended: { label: 'Loja suspensa', icon: AlertCircle, color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/30' },
   }
 
-  const status = myStore ? statusConfig[myStore.status] : null
+  const status = (myStore && myStore.status in statusConfig) 
+    ? statusConfig[myStore.status as keyof typeof statusConfig] 
+    : null
 
   const [offerState, setOfferState] = useState<'idle' | 'active' | 'cooldown'>('idle')
   const [timeLeft, setTimeLeft] = useState(0)
+  const [showGallery, setShowGallery] = useState(false)
+  const [zoomedImage, setZoomedImage] = useState<string | null>(null)
 
   // Sync state with database on load/store update
   useEffect(() => {
+    // Reset state first to avoid showing old store's timer
+    setOfferState('idle')
+    setTimeLeft(0)
+
     if (myStore) {
       const now = new Date()
-      const offerEnd = myStore.offer_expires_at ? new Date(myStore.offer_expires_at) : null
-      const cooldownEnd = myStore.cooldown_expires_at ? new Date(myStore.cooldown_expires_at) : null
+      const offerEnd = myStore?.offer_expires_at ? new Date(myStore.offer_expires_at) : null
+      const cooldownEnd = myStore?.cooldown_expires_at ? new Date(myStore.cooldown_expires_at) : null
 
       if (offerEnd && offerEnd > now) {
         setOfferState('active')
@@ -61,7 +71,7 @@ export default function AdminDashboard() {
         setTimeLeft(0)
       }
     }
-  }, [myStore])
+  }, [activeStoreId, myStore])
 
   useEffect(() => {
     let interval: any
@@ -118,8 +128,28 @@ export default function AdminDashboard() {
         </h1>
         <p className="text-gray-600 mt-1">Gerencie sua presença na feira digital</p>
       </div>
+      
+      {/* Store Selector (if multi-store) */}
+      {myStores.length > 1 && (
+        <div className="flex gap-2 mb-8 p-1 bg-white rounded-2xl border border-gray-100 shadow-sm">
+          {myStores.map(s => (
+            <button
+              key={s.id}
+              onClick={() => setActiveStoreId(s.id)}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all ${
+                activeStoreId === s.id
+                  ? "bg-palmas-blue text-white shadow-lg shadow-palmas-blue/20"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              <Store size={16} />
+              {s.name}
+            </button>
+          ))}
+        </div>
+      )}
 
-      {!myStore ? (
+      {myStores.length === 0 ? (
         /* No store yet */
         <div className="card p-12 text-center border-dashed border-2 border-gray-200">
           <div className="w-20 h-20 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
@@ -136,6 +166,12 @@ export default function AdminDashboard() {
             Criar minha banca
           </Link>
         </div>
+      ) : !myStore ? (
+        /* Store selection in progress or no store selected */
+        <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+          <Loader2 className="w-8 h-8 animate-spin mb-4" />
+          <p className="text-sm font-medium">Carregando informações da loja...</p>
+        </div>
       ) : (
         <div className="space-y-6 pb-12">
           {/* Status card */}
@@ -143,7 +179,7 @@ export default function AdminDashboard() {
             <div className={`flex items-center justify-between p-5 rounded-xl border-2 shadow-sm ${status.bg} transition-all hover:shadow-md`}>
               <div className="flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center bg-white shadow-inner`}>
-                  <status.icon size={24} className={myStore.status === 'active' ? 'text-green-500' : status.color} />
+                  <status.icon size={24} className={myStore?.status === 'active' ? 'text-green-500' : status.color} />
                 </div>
                 <div>
                   <div className={`font-bold text-lg uppercase tracking-tight ${status.color}`}>{status.label}</div>
@@ -201,6 +237,14 @@ export default function AdminDashboard() {
                     </div>
                   )}
                 </div>
+                {myStore.gallery && myStore.gallery.length > 0 && (
+                  <button 
+                    onClick={() => setShowGallery(true)}
+                    className="mt-4 flex items-center gap-2 text-[11px] font-bold text-palmas-blue hover:underline"
+                  >
+                    <Image size={14} /> Ver fotos da galeria ({myStore.gallery.length})
+                  </button>
+                )}
               </div>
             </div>
 
@@ -302,8 +346,82 @@ export default function AdminDashboard() {
                 </div>
                 <ArrowRight size={18} className="text-gray-400 group-hover:text-white transition-all group-hover:translate-x-1" />
               </Link>
+
+              {myStores.length < 2 && (
+                <Link
+                  to="/store"
+                  onClick={() => resetActiveStoreId()}
+                  className="flex items-center justify-between p-5 card border-dashed border-2 hover:bg-gray-50 transition-all"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
+                      <Plus size={20} className="text-gray-400" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-gray-800 text-sm">Adicionar Segunda Loja</div>
+                      <div className="text-[11px] text-gray-500">Aumente sua presença na feira</div>
+                    </div>
+                  </div>
+                  <ArrowRight size={18} className="text-gray-400" />
+                </Link>
+              )}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Gallery Modal */}
+      {showGallery && myStore && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in" onClick={() => setShowGallery(false)}>
+          <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+              <h3 className="font-display text-xl font-bold text-gray-800">Galeria de Fotos</h3>
+              <button onClick={() => setShowGallery(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors">
+                <X size={24} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {myStore.gallery?.map((url, i) => (
+                  <div key={i} className="aspect-square rounded-2xl overflow-hidden shadow-sm border border-gray-100 group relative">
+                    <img src={url} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                    <button 
+                      onClick={() => setZoomedImage(url)}
+                      className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold"
+                    >
+                      Ampliar foto
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="p-6 bg-gray-50 border-t border-gray-100">
+              <p className="text-center text-xs text-gray-500 font-medium">
+                {myStore.gallery?.length} fotos cadastradas. Edite sua loja para adicionar ou remover fotos.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image Lightbox (Admin) */}
+      {zoomedImage && (
+        <div 
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md animate-fade-in"
+          onClick={() => setZoomedImage(null)}
+        >
+          <button 
+            className="absolute top-6 right-6 text-white hover:text-gray-300 p-2"
+            onClick={() => setZoomedImage(null)}
+          >
+            <X size={32} />
+          </button>
+          <img 
+            src={zoomedImage} 
+            alt="" 
+            className="max-w-full max-h-[90vh] rounded-2xl shadow-2xl animate-scale-in object-contain"
+            onClick={e => e.stopPropagation()}
+          />
         </div>
       )}
 

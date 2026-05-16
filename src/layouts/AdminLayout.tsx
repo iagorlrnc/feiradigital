@@ -1,10 +1,12 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom'
-import { ShoppingBag, LayoutDashboard, Store, Clock, LogOut, Menu, Zap } from 'lucide-react'
+import { ShoppingBag, LayoutDashboard, Store, Clock, LogOut, Menu, Zap, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useAuthStore } from '../store/authStore'
+import { useStoreStore } from '../store/storeStore'
 
 export default function AdminLayout() {
   const { user, signOut } = useAuthStore()
+  const { myStores, activeStoreId, setActiveStoreId, resetActiveStoreId } = useStoreStore()
   const location = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -30,7 +32,7 @@ export default function AdminLayout() {
         fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col
         transform transition-transform duration-300
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:static lg:z-auto
+        lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:z-auto overflow-y-auto
       `}>
         {/* Logo */}
         <div className="p-6 border-b border-gray-200">
@@ -96,6 +98,42 @@ export default function AdminLayout() {
             Planos
           </NavLink>
         </nav>
+
+        {/* Store Switcher */}
+        {myStores.length > 1 && (
+          <div className="px-4 py-4 border-t border-gray-200">
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3 px-2">Trocar Loja</p>
+            <div className="space-y-1">
+              {myStores.map(s => (
+                <button
+                  key={s.id}
+                  onClick={() => setActiveStoreId(s.id)}
+                  className={`w-full flex items-center gap-3 px-4 py-2 rounded-md text-xs font-bold transition-all ${
+                    activeStoreId === s.id
+                      ? 'bg-palmas-blue/10 text-palmas-blue'
+                      : 'text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className={`w-2 h-2 rounded-full ${activeStoreId === s.id ? 'bg-palmas-blue animate-pulse' : 'bg-gray-300'}`} />
+                  <span className="truncate">{s.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {myStores.length === 1 && (
+          <div className="px-4 py-4 border-t border-gray-200">
+            <NavLink
+              to="/store"
+              onClick={() => resetActiveStoreId()}
+              className="w-full flex items-center gap-3 px-4 py-2 rounded-md text-xs font-bold text-gray-400 hover:text-palmas-blue hover:bg-gray-50 transition-all border border-dashed border-gray-200"
+            >
+              <Plus size={14} />
+              <span>Adicionar Loja</span>
+            </NavLink>
+          </div>
+        )}
 
         {/* User */}
         <div className="p-4 border-t border-gray-200">
