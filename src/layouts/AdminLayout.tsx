@@ -39,7 +39,7 @@ export default function AdminLayout() {
               <ShoppingBag size={18} className="text-white" />
             </div>
             <div>
-              <div className="font-display text-lg font-bold text-palmas-text">FeiraTech</div>
+              <div className="font-display text-lg font-bold text-palmas-text">FeiraDigital</div>
               <div className="text-xs text-gray-600">Painel do Lojista</div>
             </div>
           </div>

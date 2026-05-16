@@ -114,7 +114,7 @@ export default function AdminDashboard() {
       {/* Greeting */}
       <div className="mb-8">
         <h1 className="font-display text-3xl font-bold text-palmas-text">
-          Olá, {user?.full_name?.split(' ')[0] ?? 'Lojista'} 👋
+          Olá, {user?.full_name?.split(' ')[0] ?? 'Lojista'}
         </h1>
         <p className="text-gray-600 mt-1">Gerencie sua presença na feira digital</p>
       </div>

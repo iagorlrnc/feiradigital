@@ -4,29 +4,29 @@ export default function AdminPlansPage() {
   const plans = [
     {
       name: 'Básico',
-      price: 'Grátis',
-      desc: 'Para quem está começando',
+      price: 'R$ 50',
+      desc: 'Essencial para sua banca',
       icon: Zap,
       color: 'bg-gray-100 text-gray-600',
-      features: ['Posição no mapa', 'Descrição da loja', 'Link para WhatsApp', 'Até 5 fotos'],
+      features: ['Posição no mapa', 'Descrição da loja', 'Adicione 1 foto da loja', 'Links para redes sociais'],
       current: true
     },
     {
       name: 'Profissional',
-      price: 'R$ 49/mês',
-      desc: 'Destaque sua marca',
+      price: 'R$ 70',
+      desc: 'Destaque e engajamento',
       icon: Star,
       color: 'bg-palmas-blue/10 text-palmas-blue',
-      features: ['Tudo do Básico', 'Banner personalizado', 'Destaque no mapa', 'Relatórios de visitas', 'Link para Instagram'],
+      features: ['Tudo do Plano Básico', 'Posição de destaque', 'Adicione até 3 fotos da loja', 'Card personalizado para compartilhamento'],
       popular: true
     },
     {
       name: 'Premium',
-      price: 'R$ 99/mês',
+      price: 'R$ 90',
       desc: 'O poder máximo da feira',
       icon: Rocket,
       color: 'bg-palmas-dark text-white',
-      features: ['Tudo do Profissional', 'QR Code exclusivo', 'Suporte prioritário 24h', 'Anúncios na Home', 'Acesso à API'],
+      features: ['Tudo do Plano Profissional', 'Pode administrar 2 lojas', 'Adicione até 5 fotos por loja', 'Oferta relâmpago disponível'],
     }
   ]
 
