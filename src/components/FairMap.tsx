@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef, useEffect } from "react"
-import { ZoomIn, ZoomOut, Maximize, MousePointer2, Info, LayoutGrid, Map, Flame } from "lucide-react"
+import { ZoomIn, ZoomOut, Maximize, Info, LayoutGrid, Map } from "lucide-react"
 import type { Store } from "../lib/supabase"
 import { CATEGORY_ICONS } from "../lib/supabase"
 import LocationMap from "./LocationMap"
@@ -308,7 +308,7 @@ export default function FairMap({
               <div className="h-px bg-gray-100 my-1" />
               <div className="flex items-center gap-3">
                 <div className="w-4 h-4 rounded-lg bg-black border border-black/10" />
-                <span className="text-[11px] text-gray-900 font-black uppercase tracking-wider">Banca Ocupada</span>
+                <span className="text-[11px] text-gray-900 font-black uppercase tracking-wider">Espaço Ocupado</span>
               </div>
             </div>
           </div>

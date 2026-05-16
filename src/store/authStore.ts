@@ -26,13 +26,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initialized: false,
 
   init: async () => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-    if (session?.user) {
-      await get().fetchProfile(session.user.id)
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      if (session?.user) {
+        await get().fetchProfile(session.user.id)
+      }
+    } catch (err) {
+      console.error("Auth init error:", err)
+    } finally {
+      set({ initialized: true })
     }
-    set({ initialized: true })
 
     supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
@@ -44,12 +49,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   fetchProfile: async (userId: string) => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", userId)
-      .single()
-    if (data) set({ user: data })
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single()
+      
+      if (error) throw error
+      if (data) set({ user: data })
+    } catch (err) {
+      console.error("Error fetching profile:", err)
+      // On error, we might want to clear user to avoid stale state
+      set({ user: null })
+    }
   },
 
   signIn: async (email, password) => {

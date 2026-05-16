@@ -59,6 +59,7 @@ export const useStoreStore = create<StoreState>((set, get) => ({
   },
 
   fetchMyStore: async (ownerId) => {
+    set({ loading: true })
     try {
       const { data, error } = await supabase
         .from("stores")
@@ -68,19 +69,24 @@ export const useStoreStore = create<StoreState>((set, get) => ({
       if (error) throw error
       
       const stores = data ?? []
-      set({ myStores: stores })
       
       // Default to first store if none selected or current selection no longer exists
       const currentActiveId = get().activeStoreId
+      let nextActiveId = currentActiveId
+
       if (stores.length > 0) {
         if (!currentActiveId || !stores.find(s => s.id === currentActiveId)) {
-          set({ activeStoreId: stores[0].id })
+          nextActiveId = stores[0].id
         }
       } else {
-        set({ activeStoreId: null })
+        nextActiveId = null
       }
+
+      set({ myStores: stores, activeStoreId: nextActiveId })
     } catch (err) {
       console.error("Error fetching my stores:", err)
+    } finally {
+      set({ loading: false })
     }
   },
 
@@ -95,12 +101,16 @@ export const useStoreStore = create<StoreState>((set, get) => ({
   fetchAllStores: async () => {
     set({ loading: true })
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("stores")
         .select("*, profiles(full_name, email, phone)")
         .order("created_at", { ascending: false })
-      set({ stores: data ?? [], loading: false })
+      
+      if (error) throw error
+      set({ stores: data ?? [] })
     } catch (err) {
+      console.error("Error fetching all stores:", err)
+    } finally {
       set({ loading: false })
     }
   },

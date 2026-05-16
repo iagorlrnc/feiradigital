@@ -77,13 +77,13 @@ export type StoreCategory =
   | 'outros'
 
 export const CATEGORY_LABELS: Record<StoreCategory, string> = {
-  alimentacao: '🍽️ Alimentação',
-  moda: '👗 Moda',
-  artesanato: '🎨 Artesanato',
-  eletronicos: '📱 Eletrônicos',
-  beleza: '💄 Beleza',
-  servicos: '🔧 Serviços',
-  outros: '📦 Outros',
+  alimentacao: 'Alimentação',
+  moda: 'Moda',
+  artesanato: 'Artesanato',
+  eletronicos: 'Eletrônicos',
+  beleza: 'Beleza',
+  servicos: 'Serviços',
+  outros: 'Outros',
 }
 
 export const CATEGORY_ICONS: Record<StoreCategory, string> = {

@@ -145,7 +145,7 @@ export default function AdminHoursPage() {
       {/* Store Selector (Loja 1, Loja 2) */}
       {myStores.length > 1 && (
         <div className="flex gap-2 mb-8 p-1 bg-white rounded-2xl border border-gray-100 shadow-sm">
-          {myStores.map((s, index) => (
+          {myStores.map((s) => (
             <button
               key={s.id}
               type="button"
@@ -157,7 +157,7 @@ export default function AdminHoursPage() {
               }`}
             >
               <Store size={16} />
-              Loja {index + 1}
+              {s.name}
             </button>
           ))}
         </div>

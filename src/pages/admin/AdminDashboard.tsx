@@ -7,7 +7,7 @@ import { CATEGORY_ICONS } from '../../lib/supabase'
 
 export default function AdminDashboard() {
   const { user } = useAuthStore()
-  const { myStores, activeStoreId, setActiveStoreId, resetActiveStoreId, fetchMyStore, updateFlashOffer, subscribeToStores } = useStoreStore()
+  const { myStores, activeStoreId, loading, setActiveStoreId, resetActiveStoreId, fetchMyStore, updateFlashOffer, subscribeToStores } = useStoreStore()
   
   const myStore = myStores.find(s => s.id === activeStoreId) || null
   const navigate = useNavigate()
@@ -119,12 +119,21 @@ export default function AdminDashboard() {
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
+  if (loading && myStores.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-32 text-gray-400">
+        <Loader2 className="w-10 h-10 animate-spin mb-4 text-palmas-blue" />
+        <p className="text-sm font-medium animate-pulse">Carregando informações...</p>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-2xl mx-auto animate-fade-in">
       {/* Greeting */}
       <div className="mb-8">
         <h1 className="font-display text-3xl font-bold text-palmas-text">
-          Olá, {user?.full_name?.split(' ')[0] ?? 'Lojista'} 👋
+          Olá, {user?.full_name?.split(' ')[0] ?? 'Lojista'}
         </h1>
         <p className="text-gray-600 mt-1">Gerencie sua presença na feira digital</p>
       </div>

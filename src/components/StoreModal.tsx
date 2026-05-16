@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { X, MapPin, Phone, Instagram, MessageCircle, Clock, Image, Package, Maximize } from 'lucide-react'
 import { supabase, type Store, type Product } from '../lib/supabase'
-import { CATEGORY_ICONS, CATEGORY_LABELS } from '../lib/supabase'
+import { CATEGORY_ICONS } from '../lib/supabase'
 import { getStoreStatus } from '../lib/hours'
 
 interface StoreModalProps {
@@ -28,18 +28,17 @@ export default function StoreModal({ store, onClose, onShowOnMap }: StoreModalPr
           .eq('store_id', store.id)
           .eq('is_active', true)
           .order('created_at', { ascending: false })
-        
+
         setProducts(data || [])
         setLoadingProducts(false)
       }
       fetchStoreProducts()
     }
   }, [store?.id])
-  
+
   if (!store) return null
 
-  const categoryIcon = CATEGORY_ICONS[store.category as keyof typeof CATEGORY_ICONS] ?? '📦'
-  const categoryLabel = CATEGORY_LABELS[store.category as keyof typeof CATEGORY_LABELS] ?? store.category
+  const categoryIcon = CATEGORY_ICONS[store.category as keyof typeof CATEGORY_ICONS] || '📦'
   const statusInfo = getStoreStatus(store.business_hours)
 
   return (
@@ -66,7 +65,7 @@ export default function StoreModal({ store, onClose, onShowOnMap }: StoreModalPr
               </div>
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-            
+
             <button
               onClick={onClose}
               className="absolute top-4 right-4 w-10 h-10 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all border border-white/30 z-20"
@@ -109,7 +108,7 @@ export default function StoreModal({ store, onClose, onShowOnMap }: StoreModalPr
 
           {/* Description */}
           <div className="mb-4">
-            <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5 px-1">Sobre a Banca</h4>
+            <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5 px-1">Sobre a Loja</h4>
             <p className="text-gray-600 text-[13px] leading-relaxed bg-gray-50/50 p-3 rounded-2xl border border-dashed border-gray-200">
               {store.description || 'Esta loja ainda não adicionou uma descrição detalhada.'}
             </p>
@@ -205,7 +204,7 @@ export default function StoreModal({ store, onClose, onShowOnMap }: StoreModalPr
 
         {/* Fixed Footer */}
         <div className="p-6 bg-gray-50 border-t border-gray-100 flex-shrink-0">
-          <button 
+          <button
             onClick={onClose}
             className="w-full py-4 rounded-2xl bg-gray-900 text-white font-bold text-sm hover:bg-black transition-all shadow-xl shadow-gray-200"
           >

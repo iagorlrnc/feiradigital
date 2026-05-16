@@ -24,6 +24,7 @@ export default function AdminProductsPage() {
     myStores,
     activeStoreId,
     products,
+    loading: productsLoading,
     fetchProducts,
     createProduct,
     updateProduct,
@@ -216,7 +217,7 @@ export default function AdminProductsPage() {
       {/* Store Selector (if multi-store) */}
       {myStores.length > 1 && (
         <div className="flex gap-2 mb-8 p-1 bg-white rounded-2xl border border-gray-100 shadow-sm">
-          {myStores.map((s, index) => (
+          {myStores.map((s) => (
             <button
               key={s.id}
               type="button"
@@ -228,7 +229,7 @@ export default function AdminProductsPage() {
               }`}
             >
               <Package size={16} />
-              Loja {index + 1}
+              {s.name}
             </button>
           ))}
         </div>
@@ -400,7 +401,13 @@ export default function AdminProductsPage() {
           </div>
 
           {/* Products Grid */}
-          {filteredProducts.length > 0 ? (
+          {productsLoading ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-28 bg-gray-50 rounded-2xl animate-pulse border border-gray-100" />
+              ))}
+            </div>
+          ) : filteredProducts.length > 0 ? (
             <div key={activeStoreId} className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in">
               {filteredProducts.map((product) => (
                 <div key={product.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all group overflow-hidden flex items-center p-3 gap-4 animate-scale-in">

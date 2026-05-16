@@ -130,7 +130,7 @@ export default function CeoDashboard() {
           <div className="grid sm:grid-cols-2 gap-4">
             {[
               {
-                to: "/dev/stores",
+                to: "/stores",
                 icon: Store,
                 label: "Gerenciar lojas",
                 desc: "Aprovar, suspender, editar",

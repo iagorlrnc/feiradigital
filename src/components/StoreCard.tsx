@@ -1,4 +1,4 @@
-import { MapPin, Phone, Instagram, MessageCircle, ArrowUpRight } from 'lucide-react'
+import { Phone, Instagram, MessageCircle, ArrowUpRight } from 'lucide-react'
 import type { Store } from '../lib/supabase'
 import { CATEGORY_ICONS, CATEGORY_LABELS } from '../lib/supabase'
 
@@ -7,9 +7,10 @@ interface StoreCardProps {
   onClick?: () => void
   selected?: boolean
   compact?: boolean
+  matchingProduct?: string | null
 }
 
-export default function StoreCard({ store, onClick, selected, compact }: StoreCardProps) {
+export default function StoreCard({ store, onClick, selected, compact, matchingProduct }: StoreCardProps) {
   const categoryIcon = CATEGORY_ICONS[store.category as keyof typeof CATEGORY_ICONS] ?? '📦'
   const categoryLabel = CATEGORY_LABELS[store.category as keyof typeof CATEGORY_LABELS] ?? store.category
 
@@ -32,10 +33,16 @@ export default function StoreCard({ store, onClick, selected, compact }: StoreCa
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <div className={`font-bold text-sm truncate ${selected ? 'text-white' : 'text-gray-900'}`}>{store.name}</div>
-          <div className={`text-[10px] font-medium flex items-center gap-1.5 mt-0.5 ${selected ? 'text-white/70' : 'text-gray-500'}`}>
-            <MapPin size={10} />
-            Banca {store.booth_label}
+          <div className="flex items-center gap-2">
+            <div className={`font-bold text-sm truncate ${selected ? 'text-white' : 'text-gray-900'}`}>{store.name}</div>
+            {matchingProduct && (
+              <span className={`text-[8px] px-1.5 py-0.5 rounded bg-green-100 text-green-700 font-bold whitespace-nowrap ${selected ? 'bg-white/20 text-white' : ''}`}>
+                ✓ {matchingProduct} disponível
+              </span>
+            )}
+          </div>
+          <div className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 ${selected ? 'text-white/70' : 'text-palmas-blue'}`}>
+            {categoryLabel}
           </div>
         </div>
         {!selected && (
@@ -62,11 +69,6 @@ export default function StoreCard({ store, onClick, selected, compact }: StoreCa
             {categoryIcon}
           </div>
         )}
-        <div className="absolute top-3 right-3">
-          <div className="bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-black text-gray-800 shadow-xl flex items-center gap-1.5 border border-white/50">
-            <MapPin size={10} className="text-palmas-blue" /> BANCA {store.booth_label}
-          </div>
-        </div>
       </div>
 
       {/* Logo + info */}
@@ -80,7 +82,15 @@ export default function StoreCard({ store, onClick, selected, compact }: StoreCa
             )}
           </div>
           <div className="flex-1 min-w-0 pt-1">
-            <h3 className="font-bold text-gray-900 truncate text-lg group-hover:text-palmas-blue transition-colors">{store.name}</h3>
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <h3 className="font-bold text-gray-900 truncate text-lg group-hover:text-palmas-blue transition-colors">{store.name}</h3>
+              {matchingProduct && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-50 text-green-600 font-black uppercase tracking-widest flex items-center gap-1 border border-green-100">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                  {matchingProduct} disponível
+                </span>
+              )}
+            </div>
             <span className="text-xs font-bold text-palmas-blue uppercase tracking-widest">{categoryLabel}</span>
           </div>
         </div>

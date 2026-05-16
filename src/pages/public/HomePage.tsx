@@ -105,8 +105,7 @@ export default function HomePage() {
         </div>
 
         {/* Featured Section */}
-        {!search && !categoryFilter && (
-          <div className="mb-12 animate-fade-in">
+        <div className="mb-12 animate-fade-in">
             <div className="flex items-center justify-between mb-6 px-1">
               <h2 className="font-display text-2xl font-bold text-palmas-text flex items-center gap-3">
                 <Star className="text-yellow-400 fill-yellow-400" size={24} />
@@ -172,7 +171,6 @@ export default function HomePage() {
               })}
             </div>
           </div>
-        )}
 
         {/* Controls */}
         <div className="flex flex-col lg:flex-row gap-4 mb-8 bg-white p-4 rounded-3xl border border-gray-100 shadow-sm items-center">
@@ -247,7 +245,7 @@ export default function HomePage() {
             <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
               <Search size={32} className="text-gray-300" />
             </div>
-            <p className="text-xl font-bold text-gray-900">Ops! Nenhuma banca encontrada</p>
+            <p className="text-xl font-bold text-gray-900">Ops! Nenhuma loja encontrada</p>
             <p className="text-sm text-gray-500 mt-2 max-w-xs mx-auto">Tente usar termos mais genéricos ou mude a categoria de busca.</p>
             <button onClick={() => { setSearch(''); setCategoryFilter('') }} className="mt-8 text-palmas-blue font-bold hover:underline">
               Limpar todos os filtros
@@ -267,7 +265,7 @@ export default function HomePage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between px-1">
                 <h3 className="font-bold text-gray-900 text-sm">
-                  {selectedStore ? 'Selecionada' : `${filtered.length} Bancas`}
+                  {selectedStore ? 'Selecionada' : `${filtered.length} Lojas`}
                 </h3>
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Lista Rápida</span>
               </div>
@@ -279,6 +277,7 @@ export default function HomePage() {
                     compact
                     selected={selectedStore?.id === store.id}
                     onClick={() => handleMapSelect(selectedStore?.id === store.id ? null : store)}
+                    matchingProduct={search ? store.products?.find(p => p.name.toLowerCase().includes(search.toLowerCase()))?.name : null}
                   />
                 ))}
               </div>
@@ -291,6 +290,7 @@ export default function HomePage() {
                 key={store.id}
                 store={store}
                 onClick={() => setModalStore(store)}
+                matchingProduct={search ? store.products?.find(p => p.name.toLowerCase().includes(search.toLowerCase()))?.name : null}
               />
             ))}
           </div>
@@ -302,6 +302,7 @@ export default function HomePage() {
                 store={store}
                 compact
                 onClick={() => setModalStore(store)}
+                matchingProduct={search ? store.products?.find(p => p.name.toLowerCase().includes(search.toLowerCase()))?.name : null}
               />
             ))}
           </div>

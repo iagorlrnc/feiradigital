@@ -74,8 +74,11 @@ export default function CeoMapPage() {
 
       {/* Map */}
       <div className="card p-6">
-        {loading ? (
-          <div className="h-64 flex items-center justify-center text-gray-500">Carregando mapa...</div>
+        {loading && stores.length === 0 ? (
+          <div className="h-64 flex flex-col items-center justify-center text-gray-500 gap-4">
+            <RefreshCw className="animate-spin text-palmas-blue" size={24} />
+            <p>Carregando mapa...</p>
+          </div>
         ) : (
           <FairMap
             stores={filtered}

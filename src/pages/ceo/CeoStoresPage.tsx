@@ -108,8 +108,11 @@ export default function CeoStoresPage() {
 
       {/* Table */}
       <div className="card overflow-hidden">
-        {loading ? (
-          <div className="p-8 text-center text-gray-500">Carregando...</div>
+        {loading && stores.length === 0 ? (
+          <div className="p-8 text-center text-gray-500 flex flex-col items-center gap-4">
+            <Clock className="animate-spin text-palmas-blue" size={24} />
+            <p>Carregando lojas...</p>
+          </div>
         ) : filtered.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
             <div className="text-4xl mb-3">🏪</div>

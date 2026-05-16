@@ -39,6 +39,7 @@ export default function AdminStorePage() {
     myStores,
     activeStoreId,
     stores,
+    loading,
     fetchMyStore,
     fetchAllStores,
     createStore,
@@ -334,7 +335,7 @@ export default function AdminStorePage() {
       {/* Store Selector (Loja 1, Loja 2) */}
       {(myStores.length > 0 || !activeStoreId) && (
         <div className="flex gap-2 mb-4 p-1 bg-white rounded-2xl border border-gray-100 shadow-sm mt-8">
-          {myStores.map((s, index) => (
+          {myStores.map((s) => (
             <button
               key={s.id}
               type="button"
@@ -346,7 +347,7 @@ export default function AdminStorePage() {
               }`}
             >
               <Store size={16} />
-              Loja {index + 1}
+              {s.name}
             </button>
           ))}
           {myStores.length < 2 && (
@@ -390,24 +391,31 @@ export default function AdminStorePage() {
         ))}
       </div>
 
-      {error && (
-        <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm mb-6 animate-scale-in">
-          <AlertCircle size={18} className="flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="font-bold">Atenção</p>
-            <p className="opacity-90">{error}</p>
-          </div>
+      {loading && myStores.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+          <Loader2 className="w-10 h-10 animate-spin mb-4 text-palmas-blue" />
+          <p className="text-sm font-medium animate-pulse">Carregando loja...</p>
         </div>
-      )}
-      {success && (
-        <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-100 rounded-2xl text-green-600 text-sm mb-6 animate-scale-in">
-          <CheckCircle size={18} className="flex-shrink-0" />
-          <p className="font-bold text-green-700">Dados salvos com sucesso!</p>
-        </div>
-      )}
+      ) : (
+        <>
+          {error && (
+            <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm mb-6 animate-scale-in">
+              <AlertCircle size={18} className="flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold">Atenção</p>
+                <p className="opacity-90">{error}</p>
+              </div>
+            </div>
+          )}
+          {success && (
+            <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-100 rounded-2xl text-green-600 text-sm mb-6 animate-scale-in">
+              <CheckCircle size={18} className="flex-shrink-0" />
+              <p className="font-bold text-green-700">Dados salvos com sucesso!</p>
+            </div>
+          )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {activeTab === "info" && (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {activeTab === "info" && (
           <div className="space-y-6">
             {/* Imagens (Banner e Logo) */}
             <div className="card overflow-hidden">
@@ -684,7 +692,9 @@ export default function AdminStorePage() {
             </button>
           </div>
         )}
-      </form>
+        </form>
+      </>
+      )}
     </div>
   )
 }

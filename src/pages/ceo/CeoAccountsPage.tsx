@@ -70,8 +70,11 @@ export default function CeoAccountsPage() {
 
       {/* Table */}
       <div className="card overflow-hidden">
-        {loading ? (
-          <div className="p-8 text-center text-gray-500">Carregando contas...</div>
+        {loading && accounts.length === 0 ? (
+          <div className="p-12 text-center text-gray-500 flex flex-col items-center gap-4">
+            <Users className="animate-pulse text-palmas-blue" size={32} />
+            <p>Carregando contas...</p>
+          </div>
         ) : filtered.length === 0 ? (
           <div className="p-8 text-center">
             <div className="text-4xl mb-3">👥</div>
