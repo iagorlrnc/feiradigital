@@ -7,6 +7,7 @@ import StoreModal from '../../components/StoreModal'
 import FairMap from '../../components/FairMap'
 import type { Store } from '../../lib/supabase'
 import { CATEGORY_LABELS, CATEGORY_ICONS } from '../../lib/supabase'
+import { getStoreStatus } from '../../lib/hours'
 
 type ViewMode = 'grid' | 'list' | 'map'
 
@@ -112,39 +113,63 @@ export default function HomePage() {
                 Lojas em Destaque
               </h2>
               <div className="h-px flex-1 bg-gray-100 mx-6 hidden sm:block" />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              {displayFeatured.map(store => (
-                <div key={store.id} className="group cursor-pointer" onClick={() => setModalStore(store)}>
-                  <div className="card overflow-hidden hover:border-palmas-blue/50 transition-all hover:-translate-y-1">
-                    <div className="h-32 bg-gray-100 relative">
+            </div>            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {displayFeatured.map(store => {
+                const status = getStoreStatus(store.business_hours);
+                return (
+                  <div 
+                    key={store.id} 
+                    className="group cursor-pointer relative bg-white rounded-[2rem] border border-gray-100 hover:border-palmas-blue/20 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] transition-all duration-500 overflow-hidden"
+                    onClick={() => setModalStore(store)}
+                  >
+                    {/* Banner with overlay */}
+                    <div className="h-28 bg-gray-50 relative overflow-hidden">
                       {store.banner_url ? (
-                        <img src={store.banner_url} alt="" className="w-full h-full object-cover" />
+                        <img src={store.banner_url} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                       ) : (
                         <div className="absolute inset-0 bg-gradient-to-br from-palmas-blue/10 to-palmas-dark/10" />
                       )}
-                      <div className="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-palmas-blue shadow-sm border border-white/20">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                      
+                      {/* Glassmorphism Category Tag */}
+                      <div className="absolute top-3 right-3 px-2 py-1 bg-white/30 backdrop-blur-md rounded-lg text-[8px] font-black text-white uppercase tracking-widest border border-white/20 shadow-sm">
                         {CATEGORY_LABELS[store.category as keyof typeof CATEGORY_LABELS] || store.category}
                       </div>
+
+                      {/* Status Pulse */}
+                      <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-1 bg-black/20 backdrop-blur-md rounded-lg border border-white/10">
+                        <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${status.status === 'open' ? 'bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.5)]' : 'bg-red-400'}`} />
+                        <span className="text-[8px] font-black text-white uppercase tracking-tighter">
+                          {status.status === 'open' ? 'Aberto' : 'Fechado'}
+                        </span>
+                      </div>
                     </div>
-                    <div className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-white shadow-sm border border-gray-100 rounded-xl flex items-center justify-center text-2xl -mt-8 flex-shrink-0 z-10 overflow-hidden">
+
+                    {/* Info Section */}
+                    <div className="px-6 pb-6 -mt-8 relative z-10">
+                      <div className="flex items-end gap-4">
+                        <div className="w-16 h-16 bg-white rounded-[1.25rem] flex items-center justify-center text-3xl shadow-xl border-4 border-white overflow-hidden flex-shrink-0 group-hover:-translate-y-1 transition-transform duration-300">
                           {store.logo_url ? (
                             <img src={store.logo_url} alt="" className="w-full h-full object-cover" />
                           ) : (
                             CATEGORY_ICONS[store.category as keyof typeof CATEGORY_ICONS] || '📦'
                           )}
                         </div>
-                        <div className="min-w-0">
-                          <h3 className="font-bold text-gray-900 truncate group-hover:text-palmas-blue transition-colors">{store.name}</h3>
-                          <p className="text-[10px] text-gray-500 font-medium">Banca {store.booth_label}</p>
+                        <div className="flex-1 min-w-0 pb-1">
+                          <div className="inline-block px-3 py-1 bg-white rounded-xl shadow-sm border border-gray-50 mb-1">
+                            <h3 className="font-display font-bold text-gray-900 truncate text-base group-hover:text-palmas-blue transition-colors duration-300">
+                              {store.name}
+                            </h3>
+                          </div>
                         </div>
                       </div>
                     </div>
+
+                    {/* Hover Decoration */}
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-palmas-blue to-palmas-dark transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

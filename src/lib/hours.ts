@@ -11,6 +11,7 @@ export interface StatusInfo {
   status: StoreStatus
   label: string
   color: string
+  borderColor: string
   nextDay?: string
 }
 
@@ -25,7 +26,7 @@ const DAYS_MAP: Record<number, string> = {
 }
 
 export function getStoreStatus(businessHoursStr?: string): StatusInfo {
-  if (!businessHoursStr) return { status: 'none', label: 'Horário não informado', color: 'text-gray-400' }
+  if (!businessHoursStr) return { status: 'none', label: 'Horário não informado', color: 'text-gray-400', borderColor: 'border-gray-400' }
 
   try {
     const hours: DayHours[] = JSON.parse(businessHoursStr)
@@ -36,7 +37,7 @@ export function getStoreStatus(businessHoursStr?: string): StatusInfo {
     const todayHours = hours.find(h => h.day === currentDayName)
 
     if (!todayHours || todayHours.closed) {
-      return { status: 'closed', label: 'Fechado hoje', color: 'text-red-500' }
+      return { status: 'closed', label: 'Fechado hoje', color: 'text-red-500', borderColor: 'border-red-500' }
     }
 
     const [openH, openM] = todayHours.open.split(':').map(Number)
@@ -48,19 +49,19 @@ export function getStoreStatus(businessHoursStr?: string): StatusInfo {
     const nowTotal = nowH * 60 + nowM
 
     if (nowTotal < openTotal) {
-      return { status: 'closed', label: `Abre às ${todayHours.open}`, color: 'text-orange-500' }
+      return { status: 'closed', label: `Abre às ${todayHours.open}`, color: 'text-orange-500', borderColor: 'border-orange-500' }
     }
 
     if (nowTotal >= openTotal && nowTotal < closeTotal) {
       const minutesToClose = closeTotal - nowTotal
       if (minutesToClose <= 30) {
-        return { status: 'closing_soon', label: `Fecha em breve (${todayHours.close})`, color: 'text-amber-500' }
+        return { status: 'closing_soon', label: `Fecha em breve (${todayHours.close})`, color: 'text-amber-500', borderColor: 'border-amber-500' }
       }
-      return { status: 'open', label: `Aberto até as ${todayHours.close}`, color: 'text-green-500' }
+      return { status: 'open', label: `Aberto até as ${todayHours.close}`, color: 'text-green-500', borderColor: 'border-green-500' }
     }
 
-    return { status: 'closed', label: 'Fechado agora', color: 'text-red-500' }
+    return { status: 'closed', label: 'Fechado agora', color: 'text-red-500', borderColor: 'border-red-500' }
   } catch (e) {
-    return { status: 'none', label: 'Horário não informado', color: 'text-gray-400' }
+    return { status: 'none', label: 'Horário não informado', color: 'text-gray-400', borderColor: 'border-gray-400' }
   }
 }
