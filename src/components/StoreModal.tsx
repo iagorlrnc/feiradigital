@@ -1,17 +1,40 @@
-import { useState } from 'react'
-import { X, MapPin, Phone, Instagram, MessageCircle, Tag, ExternalLink, Clock, Image } from 'lucide-react'
-import type { Store } from '../lib/supabase'
+import { useState, useEffect } from 'react'
+import { X, MapPin, Phone, Instagram, MessageCircle, Tag, ExternalLink, Clock, Image, Package, Maximize } from 'lucide-react'
+import { supabase, type Store, type Product } from '../lib/supabase'
 import { CATEGORY_ICONS, CATEGORY_LABELS } from '../lib/supabase'
 import { getStoreStatus } from '../lib/hours'
 
 interface StoreModalProps {
   store: Store | null
   onClose: () => void
+  onShowOnMap?: (store: Store) => void
 }
 
-export default function StoreModal({ store, onClose }: StoreModalProps) {
+export default function StoreModal({ store, onClose, onShowOnMap }: StoreModalProps) {
   const [showHours, setShowHours] = useState(false)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [products, setProducts] = useState<Product[]>([])
+  const [loadingProducts, setLoadingProducts] = useState(false)
+  const [showProducts, setShowProducts] = useState(false)
+  const [showGallery, setShowGallery] = useState(false)
+
+  useEffect(() => {
+    if (store?.id) {
+      const fetchStoreProducts = async () => {
+        setLoadingProducts(true)
+        const { data } = await supabase
+          .from('products')
+          .select('*')
+          .eq('store_id', store.id)
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+        
+        setProducts(data || [])
+        setLoadingProducts(false)
+      }
+      fetchStoreProducts()
+    }
+  }, [store?.id])
   
   if (!store) return null
 
@@ -71,10 +94,18 @@ export default function StoreModal({ store, onClose }: StoreModalProps) {
               )}
             </div>
             <div className="flex-1 pt-1">
-              <div className="flex items-center gap-2 text-gray-400 text-xs font-bold uppercase tracking-widest">
+              <div className="flex items-center gap-2 text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">
                 <MapPin size={12} className="text-palmas-blue" />
                 Localização: Banca {store.booth_label}
               </div>
+              {onShowOnMap && (
+                <button
+                  onClick={() => onShowOnMap(store)}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-palmas-blue/10 hover:bg-palmas-blue/20 text-palmas-blue rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border border-palmas-blue/20"
+                >
+                  <MapPin size={12} /> Localizar no Mapa
+                </button>
+              )}
             </div>
           </div>
 
@@ -120,27 +151,98 @@ export default function StoreModal({ store, onClose }: StoreModalProps) {
             </div>
           )}
 
-          {/* Gallery */}
-          {store.gallery && store.gallery.length > 0 && (
-            <div className="mt-8">
-              <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-1.5">
-                <Image size={10} className="text-palmas-blue" /> Galeria de Fotos
-              </h4>
-              <div className="flex gap-3 overflow-x-auto pb-4 custom-scrollbar snap-x no-scrollbar">
-                {store.gallery.map((url, i) => (
-                  <div 
-                    key={i} 
-                    className="w-32 h-32 rounded-2xl overflow-hidden flex-shrink-0 shadow-sm border border-gray-100 snap-start group relative"
-                  >
-                    <img src={url} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
-                    <button 
-                      onClick={() => setSelectedImage(url)}
-                      className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold"
-                    >
-                      Ver foto
-                    </button>
+          {/* Action Buttons */}
+          <div className="mt-8 grid grid-cols-2 gap-3">
+            {(products.length > 0 || loadingProducts) && (
+              <button
+                onClick={() => setShowProducts(true)}
+                className="flex items-center justify-between p-4 bg-palmas-blue/5 hover:bg-palmas-blue/10 rounded-2xl transition-all group border border-palmas-blue/10"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-palmas-blue rounded-xl flex items-center justify-center text-white shadow-lg shadow-palmas-blue/20 group-hover:scale-110 transition-transform">
+                    <Package size={20} />
                   </div>
-                ))}
+                  <div>
+                    <div className="text-[10px] font-black text-palmas-blue uppercase tracking-wider">Produtos</div>
+                    <div className="text-xs font-bold text-palmas-text">Catálogo</div>
+                  </div>
+                </div>
+                <ExternalLink size={14} className="text-palmas-blue/30" />
+              </button>
+            )}
+
+            {store.gallery && store.gallery.length > 0 && (
+              <button
+                onClick={() => setShowGallery(true)}
+                className="flex items-center justify-between p-4 bg-purple-50 hover:bg-purple-100 rounded-2xl transition-all group border border-purple-100"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-purple-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform">
+                    <Image size={20} />
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-black text-purple-700 uppercase tracking-wider">Galeria</div>
+                    <div className="text-xs font-bold text-purple-900">Fotos</div>
+                  </div>
+                </div>
+                <ExternalLink size={14} className="text-purple-300" />
+              </button>
+            )}
+          </div>
+
+          {/* Gallery Popup */}
+          {showGallery && store.gallery && (
+            <div 
+              className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-palmas-dark/60 backdrop-blur-md animate-fade-in"
+              onClick={() => setShowGallery(false)}
+            >
+              <div 
+                className="relative w-full max-w-md bg-white rounded-[2rem] shadow-2xl overflow-hidden animate-scale-in"
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-purple-500 rounded-xl flex items-center justify-center text-white">
+                      <Image size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-900">Galeria de Fotos</h3>
+                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{store.name}</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setShowGallery(false)}
+                    className="p-2 hover:bg-gray-200 rounded-full text-gray-400 transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="p-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                  <div className="grid grid-cols-2 gap-4">
+                    {store.gallery.map((url, i) => (
+                      <div 
+                        key={i} 
+                        className="aspect-square rounded-2xl overflow-hidden shadow-sm border border-gray-100 group relative cursor-pointer"
+                        onClick={() => setSelectedImage(url)}
+                      >
+                        <img src={url} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Maximize size={24} className="text-white" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-6 bg-gray-50 border-t border-gray-100">
+                  <button 
+                    onClick={() => setShowGallery(false)}
+                    className="w-full py-3 bg-gray-900 text-white rounded-xl font-bold text-sm hover:bg-black transition-all"
+                  >
+                    Voltar para Loja
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -163,6 +265,80 @@ export default function StoreModal({ store, onClose }: StoreModalProps) {
                 className="max-w-full max-h-[90vh] rounded-2xl shadow-2xl animate-scale-in object-contain"
                 onClick={e => e.stopPropagation()}
               />
+            </div>
+          )}
+
+          {/* Products Popup */}
+          {showProducts && (
+            <div 
+              className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-palmas-dark/60 backdrop-blur-md animate-fade-in"
+              onClick={() => setShowProducts(false)}
+            >
+              <div 
+                className="relative w-full max-w-md bg-white rounded-[2rem] shadow-2xl overflow-hidden animate-scale-in"
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-palmas-blue rounded-xl flex items-center justify-center text-white">
+                      <Package size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-900">Produtos</h3>
+                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{store.name}</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setShowProducts(false)}
+                    className="p-2 hover:bg-gray-200 rounded-full text-gray-400 transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="p-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                  <div className="grid grid-cols-1 gap-4">
+                    {products.map((product) => (
+                      <div 
+                        key={product.id} 
+                        className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-palmas-blue/20 transition-all group"
+                      >
+                        <div className="w-20 h-20 rounded-xl overflow-hidden bg-white shadow-sm flex-shrink-0">
+                          {product.image_url ? (
+                            <img src={product.image_url} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-200">
+                              <Package size={24} />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-start gap-2">
+                            <h5 className="text-sm font-bold text-gray-900">{product.name}</h5>
+                            <span className="text-sm font-black text-palmas-blue whitespace-nowrap">
+                              R$ {product.price.toFixed(2)}
+                            </span>
+                          </div>
+                          {product.description && (
+                            <p className="text-[11px] text-gray-500 line-clamp-3 mt-1 leading-relaxed">
+                              {product.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-6 bg-gray-50 border-t border-gray-100">
+                  <button 
+                    onClick={() => setShowProducts(false)}
+                    className="w-full py-3 bg-gray-900 text-white rounded-xl font-bold text-sm hover:bg-black transition-all"
+                  >
+                    Voltar para Loja
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 

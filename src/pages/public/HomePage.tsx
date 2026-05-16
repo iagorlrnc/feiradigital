@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, MapPin, Grid3X3, List, X, Star, MessageCircle, Instagram, Facebook, Twitter } from 'lucide-react'
+import { Search, MapPin, Grid3X3, List, X, Star, Instagram, Facebook, Twitter } from 'lucide-react'
 import { useStoreStore } from '../../store/storeStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import StoreCard from '../../components/StoreCard'
@@ -28,8 +28,12 @@ export default function HomePage() {
   }, [fetchActiveStores, fetchSettings, subscribeToStores])
 
   const filtered = stores.filter(s => {
-    const matchSearch = !search || s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.description?.toLowerCase().includes(search.toLowerCase())
+    const searchLower = search.toLowerCase()
+    const matchSearch = !search || 
+      s.name.toLowerCase().includes(searchLower) ||
+      s.description?.toLowerCase().includes(searchLower) ||
+      s.products?.some(p => p.name.toLowerCase().includes(searchLower))
+    
     const matchCat = !categoryFilter || s.category === categoryFilter
     return matchSearch && matchCat
   })
@@ -44,6 +48,17 @@ export default function HomePage() {
   function handleMapSelect(store: Store | null) {
     setSelectedStore(store)
     if (store) setModalStore(store)
+  }
+
+  function handleShowOnMap(store: Store) {
+    setModalStore(null)
+    setView('map')
+    setSelectedStore(store)
+    // Small timeout to ensure the map is rendered before scrolling/focusing
+    setTimeout(() => {
+      const element = document.getElementById(`booth-${store.id}`)
+      element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 100)
   }
 
   const formatDateRange = () => {
@@ -162,11 +177,21 @@ export default function HomePage() {
                 type="text"
                 placeholder="Pesquisar loja, produtos..."
                 value={search}
-                onChange={e => setSearch(e.target.value)}
+                onChange={e => {
+                  setSearch(e.target.value)
+                  if (e.target.value.length > 0 && view === 'map') {
+                    setView('list')
+                  }
+                }}
                 className="w-full bg-gray-50 border-transparent focus:bg-white focus:border-palmas-blue/30 focus:ring-4 focus:ring-palmas-blue/5 rounded-2xl pl-12 pr-12 py-3.5 text-sm transition-all"
               />
               {search && (
-                <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-200 transition-all">
+                <button 
+                  onClick={() => {
+                    setSearch('')
+                  }} 
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-200 transition-all"
+                >
                   <X size={14} />
                 </button>
               )}
@@ -308,20 +333,14 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* Floating Action Button */}
-      <a 
-        href="#" 
-        className="fixed bottom-8 right-8 w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-white shadow-2xl shadow-green-500/40 hover:scale-110 hover:-translate-y-1 transition-all z-40 group"
-        title="Falar com Suporte"
-      >
-        <MessageCircle size={28} />
-        <span className="absolute right-full mr-4 bg-white text-gray-800 text-xs font-bold px-4 py-2 rounded-xl shadow-xl border border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-          Precisa de ajuda?
-        </span>
-      </a>
+
 
       {/* Store Modal */}
-      <StoreModal store={modalStore} onClose={() => setModalStore(null)} />
+      <StoreModal 
+        store={modalStore} 
+        onClose={() => setModalStore(null)} 
+        onShowOnMap={handleShowOnMap}
+      />
     </div>
   )
 }

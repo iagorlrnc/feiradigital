@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom'
-import { ShoppingBag, LayoutDashboard, Store, Clock, LogOut, Menu, Zap, Plus } from 'lucide-react'
+import { ShoppingBag, LayoutDashboard, Store, Clock, LogOut, Menu, Zap, Plus, Package } from 'lucide-react'
 import { useState } from 'react'
 import { useAuthStore } from '../store/authStore'
 import { useStoreStore } from '../store/storeStore'
@@ -84,6 +84,18 @@ export default function AdminLayout() {
           >
             <Clock size={18} />
             Horário
+          </NavLink>
+          <NavLink
+            to="/products"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-all ${isActive
+                ? 'bg-palmas-blue text-white shadow-md'
+                : 'text-gray-600 hover:text-palmas-text hover:bg-gray-100'
+              }`
+            }
+          >
+            <Package size={18} />
+            Produtos
           </NavLink>
           <NavLink
             to="/plans"

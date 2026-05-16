@@ -397,52 +397,6 @@ export default function FairMap({
         </div>
       </div>
 
-      {/* Selected store overlay */}
-      {selectedStore && !editable && (
-        <div className="absolute bottom-8 left-8 right-8 md:right-auto md:w-80 bg-white/90 backdrop-blur-xl border border-white/20 shadow-2xl rounded-[2rem] animate-fade-in-up z-30 overflow-hidden">
-          {/* Mini Banner */}
-          <div className="h-20 bg-gray-100 relative">
-            {selectedStore.banner_url ? (
-              <img src={selectedStore.banner_url} alt="" className="w-full h-full object-cover" />
-            ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-palmas-blue/10 to-palmas-dark/10" />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-          </div>
-          
-          <div className="p-6 pt-0">
-            <div className="flex items-start gap-4">
-              <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-3xl shadow-xl -mt-7 z-10 border-4 border-white overflow-hidden">
-                {selectedStore.logo_url ? (
-                  <img src={selectedStore.logo_url} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  CATEGORY_ICONS[selectedStore.category as keyof typeof CATEGORY_ICONS] || '📦'
-                )}
-              </div>
-              <div className="flex-1 min-w-0 pt-2">
-                {selectedStore.offer_expires_at && new Date(selectedStore.offer_expires_at) > now ? (
-                  <div className="flex items-center gap-1 text-[10px] font-black text-orange-600 uppercase tracking-widest mb-1 animate-pulse">
-                    <Flame size={10} /> Oferta Ativa
-                  </div>
-                ) : (
-                  <div className="text-[10px] font-black text-palmas-blue uppercase tracking-widest mb-1">Destaque</div>
-                )}
-                <h3 className="font-bold text-gray-900 text-lg truncate leading-none mb-1">
-                  {selectedStore.name}
-                </h3>
-                <div className="text-xs font-bold text-gray-400">BANCA {selectedStore.booth_label}</div>
-              </div>
-            </div>
-            <button 
-              type="button"
-              onClick={() => onSelectStore?.(selectedStore)}
-              className="w-full mt-5 py-3 bg-gray-900 text-white rounded-2xl text-xs font-bold hover:bg-black transition-all flex items-center justify-center gap-2"
-            >
-              <MousePointer2 size={14} /> Ver Detalhes
-            </button>
-          </div>
-        </div>
-      )}
         </>
       )}
     </div>

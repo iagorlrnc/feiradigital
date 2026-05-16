@@ -1,10 +1,11 @@
 import { create } from "zustand"
-import { supabase, type Store } from "../lib/supabase"
+import { supabase, type Store, type Product } from "../lib/supabase"
 
 interface StoreState {
   stores: Store[]
   myStores: Store[]
   activeStoreId: string | null
+  products: Product[]
   loading: boolean
   fetchActiveStores: () => Promise<void>
   fetchMyStore: (ownerId: string) => Promise<void>
@@ -26,6 +27,10 @@ interface StoreState {
     offerExpiresAt: string | null,
     cooldownExpiresAt: string | null
   ) => Promise<{ error: string | null }>
+  fetchProducts: (storeId: string) => Promise<void>
+  createProduct: (data: Partial<Product>) => Promise<{ error: string | null }>
+  updateProduct: (id: string, data: Partial<Product>) => Promise<{ error: string | null }>
+  deleteProduct: (id: string) => Promise<{ error: string | null }>
   subscribeToStores: () => () => void
 }
 
@@ -33,6 +38,7 @@ export const useStoreStore = create<StoreState>((set, get) => ({
   stores: [],
   myStores: [],
   activeStoreId: null,
+  products: [],
   loading: false,
 
   fetchActiveStores: async () => {
@@ -40,7 +46,7 @@ export const useStoreStore = create<StoreState>((set, get) => ({
     try {
       const { data, error } = await supabase
         .from("stores")
-        .select("*, profiles(full_name, email, phone)")
+        .select("*, profiles(full_name, email, phone), products(name)")
         .eq("status", "active")
         .order("name")
       if (error) throw error
@@ -172,6 +178,51 @@ export const useStoreStore = create<StoreState>((set, get) => ({
       return {
         error: err instanceof Error ? err.message : "Erro ao atualizar oferta relâmpago",
       }
+    }
+  },
+
+  fetchProducts: async (storeId: string) => {
+    set({ loading: true })
+    try {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("store_id", storeId)
+        .order("created_at", { ascending: false })
+      
+      if (error) throw error
+      set({ products: data ?? [] })
+    } catch (err) {
+      console.error("Error fetching products:", err)
+    } finally {
+      set({ loading: false })
+    }
+  },
+
+  createProduct: async (productData) => {
+    try {
+      const { error } = await supabase.from("products").insert([productData])
+      return { error: error?.message ?? null }
+    } catch (err) {
+      return { error: err instanceof Error ? err.message : "Erro ao criar produto" }
+    }
+  },
+
+  updateProduct: async (id, productData) => {
+    try {
+      const { error } = await supabase.from("products").update(productData).eq("id", id)
+      return { error: error?.message ?? null }
+    } catch (err) {
+      return { error: err instanceof Error ? err.message : "Erro ao atualizar produto" }
+    }
+  },
+
+  deleteProduct: async (id) => {
+    try {
+      const { error } = await supabase.from("products").delete().eq("id", id)
+      return { error: error?.message ?? null }
+    } catch (err) {
+      return { error: err instanceof Error ? err.message : "Erro ao excluir produto" }
     }
   },
 

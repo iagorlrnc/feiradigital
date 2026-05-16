@@ -21,6 +21,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard"
 import AdminStorePage from "./pages/admin/AdminStorePage"
 import AdminHoursPage from "./pages/admin/AdminHoursPage"
 import AdminPlansPage from "./pages/admin/AdminPlansPage"
+import AdminProductsPage from "./pages/admin/AdminProductsPage"
 import CeoLoginPage from "./pages/ceo/CeoLoginPage"
 import CeoDashboard from "./pages/ceo/CeoDashboard"
 import CeoStoresPage from "./pages/ceo/CeoStoresPage"
@@ -68,7 +69,8 @@ function AppRoutes() {
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<AdminDashboard />} />
               <Route path="/store" element={<AdminStorePage />} />
-              <Route path="/hours" element={<AdminHoursPage />} />
+               <Route path="/hours" element={<AdminHoursPage />} />
+              <Route path="/products" element={<AdminProductsPage />} />
               <Route path="/plans" element={<AdminPlansPage />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Route>
