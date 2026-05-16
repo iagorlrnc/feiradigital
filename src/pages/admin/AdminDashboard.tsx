@@ -15,7 +15,7 @@ export default function AdminDashboard() {
       navigate('/')
       return
     }
-    
+
     fetchMyStore(user.id)
     const unsubscribe = subscribeToStores()
     return () => unsubscribe()
@@ -206,16 +206,14 @@ export default function AdminDashboard() {
 
             {/* QR Code / Quick Tools */}
             <div className="space-y-4">
-              <div className={`card overflow-hidden border-2 transition-all duration-500 flex flex-col ${
-                offerState === 'active' ? 'border-orange-500 shadow-orange-200 shadow-xl scale-[1.02]' : 
-                offerState === 'cooldown' ? 'border-gray-200 opacity-70 bg-gray-50' : 
-                'border-gray-100 opacity-90'
-              }`}>
-                <div className={`p-4 flex items-center justify-between ${
-                  offerState === 'active' ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white' : 
-                  offerState === 'cooldown' ? 'bg-gray-200 text-gray-500' : 
-                  'bg-gray-50 text-gray-500'
+              <div className={`card overflow-hidden border-2 transition-all duration-500 flex flex-col ${offerState === 'active' ? 'border-orange-500 shadow-orange-200 shadow-xl scale-[1.02]' :
+                  offerState === 'cooldown' ? 'border-gray-200 opacity-70 bg-gray-50' :
+                    'border-gray-100 opacity-90'
                 }`}>
+                <div className={`p-4 flex items-center justify-between ${offerState === 'active' ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white' :
+                    offerState === 'cooldown' ? 'bg-gray-200 text-gray-500' :
+                      'bg-gray-50 text-gray-500'
+                  }`}>
                   <div className="flex items-center gap-2">
                     {offerState === 'active' ? <Flame size={18} className="animate-bounce" /> : <Zap size={18} />}
                     <h4 className="font-bold text-xs uppercase tracking-widest">
@@ -268,7 +266,7 @@ export default function AdminDashboard() {
                     </>
                   )}
 
-                  <button 
+                  <button
                     disabled={offerState === 'cooldown'}
                     onClick={() => {
                       if (offerState === 'idle') {
@@ -277,15 +275,14 @@ export default function AdminDashboard() {
                         handleEndActive();
                       }
                     }}
-                    className={`w-full py-3 rounded-xl font-bold text-xs transition-all shadow-md ${
-                      offerState === 'active' ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 
-                      offerState === 'cooldown' ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 
-                      'bg-gradient-to-r from-orange-500 to-red-600 text-white hover:scale-105'
-                    }`}
+                    className={`w-full py-3 rounded-xl font-bold text-xs transition-all shadow-md ${offerState === 'active' ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' :
+                        offerState === 'cooldown' ? 'bg-gray-100 text-gray-400 cursor-not-allowed' :
+                          'bg-gradient-to-r from-orange-500 to-red-600 text-white hover:scale-105'
+                      }`}
                   >
-                    {offerState === 'active' ? 'Encerrar Agora' : 
-                     offerState === 'cooldown' ? 'Indisponível' : 
-                     'Ativar Agora'}
+                    {offerState === 'active' ? 'Encerrar Agora' :
+                      offerState === 'cooldown' ? 'Indisponível' :
+                        'Ativar Agora'}
                   </button>
                 </div>
               </div>

@@ -50,10 +50,9 @@ export default function AdminLayout() {
           <NavLink
             to="/dashboard"
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-all ${
-                isActive
-                  ? 'bg-palmas-blue text-white shadow-md'
-                  : 'text-gray-600 hover:text-palmas-text hover:bg-gray-100'
+              `flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-all ${isActive
+                ? 'bg-palmas-blue text-white shadow-md'
+                : 'text-gray-600 hover:text-palmas-text hover:bg-gray-100'
               }`
             }
           >
@@ -63,10 +62,9 @@ export default function AdminLayout() {
           <NavLink
             to="/store"
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-all ${
-                isActive
-                  ? 'bg-palmas-blue text-white shadow-md'
-                  : 'text-gray-600 hover:text-palmas-text hover:bg-gray-100'
+              `flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-all ${isActive
+                ? 'bg-palmas-blue text-white shadow-md'
+                : 'text-gray-600 hover:text-palmas-text hover:bg-gray-100'
               }`
             }
           >
@@ -76,10 +74,9 @@ export default function AdminLayout() {
           <NavLink
             to="/hours"
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-all ${
-                isActive
-                  ? 'bg-palmas-blue text-white shadow-md'
-                  : 'text-gray-600 hover:text-palmas-text hover:bg-gray-100'
+              `flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-all ${isActive
+                ? 'bg-palmas-blue text-white shadow-md'
+                : 'text-gray-600 hover:text-palmas-text hover:bg-gray-100'
               }`
             }
           >
@@ -89,10 +86,9 @@ export default function AdminLayout() {
           <NavLink
             to="/plans"
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-all ${
-                isActive
-                  ? 'bg-palmas-blue text-white shadow-md'
-                  : 'text-gray-600 hover:text-palmas-text hover:bg-gray-100'
+              `flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-all ${isActive
+                ? 'bg-palmas-blue text-white shadow-md'
+                : 'text-gray-600 hover:text-palmas-text hover:bg-gray-100'
               }`
             }
           >

@@ -156,15 +156,15 @@ export default function AdminHoursPage() {
             <Calendar size={16} />
             <span className="text-xs font-bold uppercase tracking-widest">Grade de Horários</span>
           </div>
-          
+
           <div className="divide-y divide-gray-100">
             {hoursList.map((item, index) => (
-              <div 
-                key={item.day} 
+              <div
+                key={item.day}
                 className={`p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors ${item.closed ? 'bg-gray-50/30' : 'bg-white'}`}
               >
                 <div className="flex items-center gap-4 min-w-[160px]">
-                  <div 
+                  <div
                     onClick={() => handleToggleDay(index)}
                     className={`w-12 h-6 rounded-full relative transition-colors cursor-pointer ${item.closed ? 'bg-gray-200' : 'bg-palmas-blue'}`}
                   >

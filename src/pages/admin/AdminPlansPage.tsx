@@ -39,8 +39,8 @@ export default function AdminPlansPage() {
 
       <div className="grid md:grid-cols-3 gap-6">
         {plans.map((plan) => (
-          <div 
-            key={plan.name} 
+          <div
+            key={plan.name}
             className={`card p-8 flex flex-col relative overflow-hidden transition-all hover:shadow-xl ${plan.popular ? 'border-2 border-palmas-blue ring-4 ring-palmas-blue/5' : ''}`}
           >
             {plan.popular && (
@@ -48,17 +48,17 @@ export default function AdminPlansPage() {
                 Mais Popular
               </div>
             )}
-            
+
             <div className={`w-12 h-12 rounded-2xl ${plan.color} flex items-center justify-center mb-6 shadow-sm`}>
               <plan.icon size={24} />
             </div>
-            
+
             <h3 className="font-display text-2xl font-bold text-gray-800">{plan.name}</h3>
             <div className="flex items-baseline gap-1 mt-2">
               <span className="text-3xl font-bold text-palmas-text">{plan.price}</span>
             </div>
             <p className="text-sm text-gray-500 mt-2 mb-8">{plan.desc}</p>
-            
+
             <div className="space-y-4 mb-8 flex-1">
               {plan.features.map(feat => (
                 <div key={feat} className="flex items-start gap-3 text-sm text-gray-600">
@@ -69,14 +69,13 @@ export default function AdminPlansPage() {
                 </div>
               ))}
             </div>
-            
-            <button 
+
+            <button
               disabled={plan.current}
-              className={`w-full py-3 rounded-xl font-bold text-sm transition-all ${
-                plan.current 
-                  ? 'bg-gray-100 text-gray-400 cursor-default' 
+              className={`w-full py-3 rounded-xl font-bold text-sm transition-all ${plan.current
+                  ? 'bg-gray-100 text-gray-400 cursor-default'
                   : 'btn-primary shadow-lg hover:-translate-y-1'
-              }`}
+                }`}
             >
               {plan.current ? 'Seu Plano Atual' : 'Fazer Upgrade'}
             </button>
