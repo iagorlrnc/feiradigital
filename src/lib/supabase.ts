@@ -34,6 +34,7 @@ export interface Store {
   plan: 'basico' | 'profissional' | 'premium'
   is_featured: boolean
   business_hours?: string
+  gallery?: string[]
   created_at: string
   updated_at: string
   offer_expires_at?: string

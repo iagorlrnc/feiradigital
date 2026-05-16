@@ -12,6 +12,10 @@ import {
   Info,
   Camera,
   Loader2,
+  Star,
+  Plus,
+  X,
+  Image as ImageIcon,
 } from "lucide-react"
 import { useAuthStore } from "../../store/authStore"
 import { useStoreStore } from "../../store/storeStore"
@@ -53,6 +57,8 @@ export default function AdminStorePage() {
     booth_x: 0,
     booth_y: 0,
     booth_label: "A1",
+    is_featured: false,
+    gallery: [] as string[],
   })
   const [isEditing, setIsEditing] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -90,6 +96,8 @@ export default function AdminStorePage() {
         booth_x: myStore.booth_x,
         booth_y: myStore.booth_y,
         booth_label: myStore.booth_label,
+        is_featured: myStore.is_featured ?? false,
+        gallery: myStore.gallery ?? [],
       })
       setEditingPos({ x: myStore.booth_x, y: myStore.booth_y })
       setIsEditing(false)
@@ -98,7 +106,7 @@ export default function AdminStorePage() {
     }
   }, [myStore])
 
-  function update(field: string, value: string | number) {
+  function update(field: string, value: string | number | boolean | string[]) {
     if (!isEditing) return
     setForm((prev) => ({ ...prev, [field]: value }))
     setError("")
@@ -137,6 +145,57 @@ export default function AdminStorePage() {
     }
   }
 
+  async function handleGalleryUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!isEditing) return
+    const files = e.target.files
+    if (!files || files.length === 0 || !user) return
+
+    const remainingSlots = 5 - form.gallery.length
+    if (remainingSlots <= 0) {
+      setError("Você já atingiu o limite de 5 fotos na galeria.")
+      return
+    }
+
+    const filesToUpload = Array.from(files).slice(0, remainingSlots)
+    setSaving(true)
+
+    try {
+      const newUrls = [...form.gallery]
+
+      for (const file of filesToUpload) {
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${user.id}/gallery_${Math.random()}.${fileExt}`
+        const filePath = `${fileName}`
+
+        const { error: uploadError } = await supabase.storage
+          .from('store-assets')
+          .upload(filePath, file, { upsert: true })
+
+        if (uploadError) throw uploadError
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('store-assets')
+          .getPublicUrl(filePath)
+
+        newUrls.push(publicUrl)
+      }
+
+      update('gallery', newUrls)
+    } catch (err) {
+      console.error(err)
+      setError("Erro ao fazer upload das imagens da galeria.")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  function removeGalleryImage(index: number) {
+    if (!isEditing) return
+    const newGallery = [...form.gallery]
+    newGallery.splice(index, 1)
+    update('gallery', newGallery)
+  }
+
   function handleSelectPosition(x: number, y: number) {
     if (!isEditing) return
     if (isAisle(x, y)) return
@@ -155,7 +214,6 @@ export default function AdminStorePage() {
       booth_label: posToLabel(x, y),
     }))
     setError("")
-    setActiveTab("info") // Switch back to info tab automatically
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -190,6 +248,8 @@ export default function AdminStorePage() {
         booth_x: editingPos.x,
         booth_y: editingPos.y,
         booth_label: posToLabel(editingPos.x, editingPos.y),
+        is_featured: form.is_featured,
+        gallery: form.gallery,
       }
 
       console.log("Saving store data...", storeData)
@@ -439,6 +499,72 @@ export default function AdminStorePage() {
                         placeholder="Ex: minha.loja"
                         disabled={!isEditing}
                       />
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <label className="label mb-0">Galeria de Fotos (Até 5)</label>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 bg-gray-100 px-2 py-0.5 rounded-lg">
+                        {form.gallery.length}/5 fotos
+                      </span>
+                    </div>
+                    
+                    <div className="grid grid-cols-5 gap-3">
+                      {form.gallery.map((url, index) => (
+                        <div key={index} className="relative aspect-square rounded-xl overflow-hidden group border border-gray-100 shadow-sm hover:shadow-md transition-all">
+                          <img src={url} alt={`Gallery ${index + 1}`} className="w-full h-full object-cover" />
+                          {isEditing && (
+                            <button
+                              type="button"
+                              onClick={() => removeGalleryImage(index)}
+                              className="absolute inset-0 bg-red-500/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white"
+                            >
+                              <X size={20} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      
+                      {isEditing && form.gallery.length < 5 && (
+                        <label className="aspect-square rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-palmas-blue hover:bg-palmas-blue/5 transition-all text-gray-400 hover:text-palmas-blue group">
+                          <Plus size={24} className="group-hover:scale-110 transition-transform" />
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className="hidden"
+                            onChange={handleGalleryUpload}
+                          />
+                        </label>
+                      )}
+                      
+                      {!isEditing && form.gallery.length === 0 && (
+                        <div className="col-span-5 py-8 flex flex-col items-center justify-center text-gray-400 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                          <ImageIcon size={32} className="mb-2 opacity-50" />
+                          <p className="text-xs font-bold uppercase tracking-widest">Nenhuma foto na galeria</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-gray-100">
+                    <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-2xl border border-gray-100">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-xl transition-colors ${form.is_featured ? 'bg-amber-100 text-amber-600' : 'bg-gray-100 text-gray-400'}`}>
+                          <Star size={20} fill={form.is_featured ? "currentColor" : "none"} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-gray-700">Loja em Destaque</p>
+                          <p className="text-xs text-gray-500">Exibir sua banca na seção de destaque da feira</p>
+                        </div>
+                      </div>
+                      <div
+                        onClick={() => isEditing && update("is_featured", !form.is_featured)}
+                        className={`w-12 h-6 rounded-full relative transition-all cursor-pointer ${!form.is_featured ? 'bg-gray-200' : 'bg-palmas-blue shadow-lg shadow-palmas-blue/20'}`}
+                      >
+                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${!form.is_featured ? 'left-1' : 'left-7'}`} />
+                      </div>
                     </div>
                   </div>
                 </div>

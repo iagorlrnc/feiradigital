@@ -131,7 +131,7 @@ export default function FairMap({
 }: FairMapProps) {
   const [zoom, setZoom] = useState(1)
   const [now, setNow] = useState(new Date())
-  const [mapMode, setMapMode] = useState<'blueprint' | 'real'>('real')
+  const [mapMode, setMapMode] = useState<'blueprint' | 'real'>(editable ? 'blueprint' : 'real')
   const containerRef = useRef<HTMLDivElement>(null)
   
   const [isDragging, setIsDragging] = useState(false)
@@ -156,6 +156,29 @@ export default function FairMap({
     const timer = setInterval(() => setNow(new Date()), 1000)
     return () => clearInterval(timer)
   }, [])
+
+  // Auto-scroll to selected/editing position
+  useEffect(() => {
+    if (mapMode === 'blueprint' && containerRef.current && (editingPosition || selectedStore)) {
+      const targetX = editingPosition?.x ?? selectedStore?.booth_x
+      const targetY = editingPosition?.y ?? selectedStore?.booth_y
+      
+      if (targetX !== undefined && targetY !== undefined) {
+        const cellWidth = 24 // Base cell size
+        const gridPadding = 48 // p-12 is 48px
+        const outerPadding = 80 // p-20 is 80px
+        
+        const scrollX = outerPadding + (targetX * cellWidth + gridPadding + 12) * zoom - containerRef.current.clientWidth / 2
+        const scrollY = outerPadding + (targetY * cellWidth + gridPadding + 12) * zoom - containerRef.current.clientHeight / 2
+        
+        containerRef.current.scrollTo({
+          left: scrollX,
+          top: scrollY,
+          behavior: 'smooth'
+        })
+      }
+    }
+  }, [mapMode, zoom, editingPosition, selectedStore])
 
   const storeMap = useMemo(() => {
     const map: Record<string, Store> = {}
@@ -225,6 +248,7 @@ export default function FairMap({
       {/* View Switcher */}
       <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20 flex p-1 bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border border-white/50">
         <button 
+          type="button"
           onClick={() => setMapMode('blueprint')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
             mapMode === 'blueprint' ? 'bg-palmas-blue text-white shadow-lg' : 'text-gray-500 hover:text-gray-700'
@@ -233,6 +257,7 @@ export default function FairMap({
           <LayoutGrid size={14} /> Esquema
         </button>
         <button 
+          type="button"
           onClick={() => setMapMode('real')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
             mapMode === 'real' ? 'bg-palmas-blue text-white shadow-lg' : 'text-gray-500 hover:text-gray-700'
@@ -250,14 +275,14 @@ export default function FairMap({
         <>
       {/* Zoom Controls */}
       <div className="absolute top-6 right-6 z-10 flex flex-col gap-1 bg-white/90 backdrop-blur-md p-1.5 rounded-2xl shadow-2xl border border-white/50">
-        <button onClick={() => setZoom(prev => Math.min(prev + 0.25, 3))} className="p-2.5 hover:bg-gray-100 rounded-xl text-gray-700 transition-all active:scale-95">
+        <button type="button" onClick={() => setZoom(prev => Math.min(prev + 0.25, 3))} className="p-2.5 hover:bg-gray-100 rounded-xl text-gray-700 transition-all active:scale-95">
           <ZoomIn size={18} />
         </button>
-        <button onClick={() => setZoom(prev => Math.max(prev - 0.25, 0.4))} className="p-2.5 hover:bg-gray-100 rounded-xl text-gray-700 transition-all active:scale-95">
+        <button type="button" onClick={() => setZoom(prev => Math.max(prev - 0.25, 0.4))} className="p-2.5 hover:bg-gray-100 rounded-xl text-gray-700 transition-all active:scale-95">
           <ZoomOut size={18} />
         </button>
         <div className="h-px bg-gray-100 mx-2" />
-        <button onClick={() => setZoom(1)} className="p-2.5 hover:bg-gray-100 rounded-xl text-gray-700 transition-all active:scale-95">
+        <button type="button" onClick={() => setZoom(1)} className="p-2.5 hover:bg-gray-100 rounded-xl text-gray-700 transition-all active:scale-95">
           <Maximize size={18} />
         </button>
       </div>
@@ -265,7 +290,7 @@ export default function FairMap({
       {/* Legend Popover (Optional but nice) */}
       <div className="absolute top-6 left-6 z-10">
         <div className="group relative">
-          <button className="w-10 h-10 bg-white shadow-xl border border-gray-100 rounded-full flex items-center justify-center text-palmas-blue hover:scale-110 transition-all">
+          <button type="button" className="w-10 h-10 bg-white shadow-xl border border-gray-100 rounded-full flex items-center justify-center text-palmas-blue hover:scale-110 transition-all">
             <Info size={20} />
           </button>
           <div className="absolute left-0 mt-3 p-5 bg-white/95 backdrop-blur-md border border-gray-100 rounded-3xl shadow-2xl w-64 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all translate-y-2 group-hover:translate-y-0">
@@ -297,8 +322,13 @@ export default function FairMap({
         onMouseUp={() => setIsDragging(false)}
         onMouseMove={handleMouseMove}
       >
-        <div className="min-w-full min-h-full flex items-center justify-center p-20">
-          <div style={{ width: 909 * zoom, height: 909 * zoom, transition: 'width 0.3s, height 0.3s' }}>
+        <div className="min-w-max min-h-max p-20">
+          <div style={{ 
+            width: 909 * zoom, 
+            height: 909 * zoom, 
+            transition: 'width 0.3s, height 0.3s',
+            margin: zoom < 1 ? '0 auto' : '0' 
+          }}>
             <div 
               className="transition-transform duration-300 origin-top-left"
               style={{ transform: `scale(${zoom})`, width: 909, height: 909 }}
@@ -399,6 +429,7 @@ export default function FairMap({
               </div>
             </div>
             <button 
+              type="button"
               onClick={() => onSelectStore?.(selectedStore)}
               className="w-full mt-5 py-3 bg-gray-900 text-white rounded-2xl text-xs font-bold hover:bg-black transition-all flex items-center justify-center gap-2"
             >

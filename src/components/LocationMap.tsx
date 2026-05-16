@@ -27,8 +27,8 @@ const userIcon = L.divIcon({
 });
 
 const FAIR_COORDS: [number, number] = [
-  Number(import.meta.env.VITE_FAIR_LAT),
-  Number(import.meta.env.VITE_FAIR_LNG)
+  Number(import.meta.env.VITE_FAIR_LAT) || -10.183,
+  Number(import.meta.env.VITE_FAIR_LNG) || -48.333
 ];
 
 const MAP_TILE_URL = import.meta.env.VITE_MAP_TILE_URL || "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
@@ -37,6 +37,16 @@ function ChangeView({ center }: { center: [number, number] }) {
   const map = useMap();
   useEffect(() => {
     map.setView(center, map.getZoom());
+    // Fix for gray tiles/cut off map - triggered by tab transitions or animations
+    const timer1 = setTimeout(() => map.invalidateSize(), 100);
+    const timer2 = setTimeout(() => map.invalidateSize(), 500);
+    const timer3 = setTimeout(() => map.invalidateSize(), 1000);
+    
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
+    };
   }, [center, map]);
   return null;
 }
