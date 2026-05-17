@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { X, MapPin, Phone, Instagram, MessageCircle, Clock, Image, Package, Maximize } from 'lucide-react'
 import { supabase, type Store, type Product } from '../lib/supabase'
-import { CATEGORY_ICONS, CATEGORY_LABELS } from '../lib/supabase'
+import { CATEGORY_ICONS } from '../lib/supabase'
 import { getStoreStatus } from '../lib/hours'
 
 interface StoreModalProps {
@@ -39,7 +39,6 @@ export default function StoreModal({ store, onClose, onShowOnMap }: StoreModalPr
   if (!store) return null
 
   const categoryIcon = CATEGORY_ICONS[store.category as keyof typeof CATEGORY_ICONS] ?? '📦'
-  const categoryLabel = CATEGORY_LABELS[store.category as keyof typeof CATEGORY_LABELS] ?? store.category
   const statusInfo = getStoreStatus(store.business_hours)
 
   return (

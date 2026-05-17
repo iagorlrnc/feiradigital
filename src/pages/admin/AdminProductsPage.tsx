@@ -31,7 +31,7 @@ export default function AdminProductsPage() {
     setActiveStoreId,
   } = useStoreStore()
 
-  const myStore = myStores.find((s) => s.id === activeStoreId) || null
+  const myStore = (myStores || []).find((s) => s.id === activeStoreId) || null
   const navigate = useNavigate()
 
   const [isAdding, setIsAdding] = useState(false)
@@ -63,7 +63,8 @@ export default function AdminProductsPage() {
     }
   }, [user, activeStoreId])
 
-  const filteredProducts = products.filter((p) =>
+  const safeProducts = products || []
+  const filteredProducts = safeProducts.filter((p: Product) =>
     p.name.toLowerCase().includes(search.toLowerCase()) ||
     p.description?.toLowerCase().includes(search.toLowerCase())
   )

@@ -12,7 +12,7 @@ import { getStoreStatus } from '../../lib/hours'
 type ViewMode = 'grid' | 'list' | 'map'
 
 export default function HomePage() {
-  const { stores, loading, fetchActiveStores, subscribeToStores } = useStoreStore()
+  const { stores, loadingActive: loading, fetchActiveStores, subscribeToStores } = useStoreStore()
   const { settings, fetchSettings } = useSettingsStore()
   const [view, setView] = useState<ViewMode>('map')
   const [search, setSearch] = useState('')
@@ -28,7 +28,8 @@ export default function HomePage() {
     return () => unsubscribe()
   }, [fetchActiveStores, fetchSettings, subscribeToStores])
 
-  const filtered = stores.filter(s => {
+  const safeStores = stores || []
+  const filtered = safeStores.filter(s => {
     const searchLower = search.toLowerCase()
     const matchSearch = !search || 
       s.name.toLowerCase().includes(searchLower) ||

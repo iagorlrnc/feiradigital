@@ -10,6 +10,7 @@ interface AuthState {
   signOut: () => Promise<void>
   fetchProfile: (userId: string) => Promise<void>
   init: () => Promise<void>
+  refreshSession: () => Promise<void>
 }
 
 interface SignUpData {
@@ -26,30 +27,61 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initialized: false,
 
   init: async () => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-    if (session?.user) {
-      await get().fetchProfile(session.user.id)
-    }
-    set({ initialized: true })
-
-    supabase.auth.onAuthStateChange(async (_event, session) => {
+    try {
+      // Busca sessão inicial
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      
       if (session?.user) {
         await get().fetchProfile(session.user.id)
-      } else {
-        set({ user: null })
       }
-    })
+    } catch (error) {
+      console.error("[Auth] Initialization error:", error)
+    } finally {
+      if (!get().initialized) {
+        set({ initialized: true })
+
+        // Vincula listener apenas uma vez
+        supabase.auth.onAuthStateChange(async (event, session) => {
+          console.log(`[Auth] Event: ${event}`)
+          if (session?.user) {
+            await get().fetchProfile(session.user.id)
+          } else {
+            set({ user: null })
+          }
+        })
+      }
+    }
+  },
+
+  refreshSession: async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session?.user) {
+      await get().fetchProfile(session.user.id)
+    } else {
+      set({ user: null })
+    }
   },
 
   fetchProfile: async (userId: string) => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", userId)
-      .single()
-    if (data) set({ user: data })
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single()
+      
+      if (error) throw error
+      if (data) {
+        set({ user: data })
+      } else {
+        set({ user: null })
+      }
+    } catch (err) {
+      console.error("[Auth] Error fetching profile:", err)
+      set({ user: null })
+    }
   },
 
   signIn: async (email, password) => {

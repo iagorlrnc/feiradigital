@@ -47,7 +47,7 @@ export default function AdminStorePage() {
     resetActiveStoreId,
   } = useStoreStore()
   
-  const myStore = myStores.find(s => s.id === activeStoreId) || null
+  const myStore = (myStores || []).find(s => s.id === activeStoreId) || null
   const navigate = useNavigate()
 
   const [form, setForm] = useState({

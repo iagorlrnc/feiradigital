@@ -13,16 +13,17 @@ import { useStoreStore } from "../../store/storeStore"
 import { CATEGORY_ICONS } from "../../lib/supabase"
 
 export default function CeoDashboard() {
-  const { stores, loading, fetchAllStores } = useStoreStore()
+  const { allStores: stores, loadingAll: loading, fetchAllStores } = useStoreStore()
 
   useEffect(() => {
     fetchAllStores()
   }, [fetchAllStores])
 
-  const total = stores.length
-  const active = stores.filter((s) => s.status === "active").length
-  const featured = stores.filter((s) => s.is_featured).length
-  const pending = stores.filter((s) => s.status === "pending").length
+  const safeStores = stores || []
+  const total = safeStores.length
+  const active = safeStores.filter((s: Store) => s.status === "active").length
+  const featured = safeStores.filter((s: Store) => s.is_featured).length
+  const pending = safeStores.filter((s: Store) => s.status === "pending").length
 
   const stats = [
     {

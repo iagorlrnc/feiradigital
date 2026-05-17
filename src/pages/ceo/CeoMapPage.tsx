@@ -7,21 +7,22 @@ import StoreModal from '../../components/StoreModal'
 import type { Store } from '../../lib/supabase'
 
 export default function CeoMapPage() {
-  const { stores, loading, fetchAllStores } = useStoreStore()
+  const { allStores: stores, loadingAll: loading, fetchAllStores } = useStoreStore()
   const [selectedStore, setSelectedStore] = useState<Store | null>(null)
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'pending'>('all')
 
   useEffect(() => { fetchAllStores() }, [fetchAllStores])
 
-  const filtered = stores.filter(s =>
+  const safeStores = stores || []
+  const filtered = safeStores.filter(s =>
     statusFilter === 'all' ? true :
     statusFilter === 'active' ? s.status === 'active' :
     s.status === 'pending'
   )
 
-  const occupiedCount = stores.length
+  const occupiedCount = safeStores.length
   const TOTAL_CELLS = 12 * 8 - (2 * 8) - (1 * 12) // minus aisles
-  const occupancyPct = Math.round((occupiedCount / TOTAL_CELLS) * 100)
+  const occupancyPct = Math.round((occupiedCount / (TOTAL_CELLS || 1)) * 100)
 
   return (
     <div className="animate-fade-in">

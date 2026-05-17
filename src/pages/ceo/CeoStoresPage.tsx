@@ -8,7 +8,7 @@ import { CATEGORY_ICONS, CATEGORY_LABELS } from '../../lib/supabase'
 type StatusFilter = 'all' | 'pending' | 'active' | 'suspended'
 
 export default function CeoStoresPage() {
-  const { stores, loading, fetchAllStores, updateStoreStatus, updateStore, deleteStore } = useStoreStore()
+  const { allStores, loadingAll: loading, fetchAllStores, updateStore, deleteStore } = useStoreStore()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
@@ -17,15 +17,15 @@ export default function CeoStoresPage() {
 
   useEffect(() => { fetchAllStores() }, [fetchAllStores])
 
-  const filtered = stores.filter(s => {
-    const matchSearch = !search || s.name.toLowerCase().includes(search.toLowerCase())
-    const matchStatus = statusFilter === 'all' || s.status === statusFilter
-    const matchCategory = categoryFilter === 'all' || s.category === categoryFilter
+  const filtered = allStores?.filter(s => {
+    const matchSearch = !search || s?.name?.toLowerCase().includes(search.toLowerCase())
+    const matchStatus = statusFilter === 'all' || s?.status === statusFilter
+    const matchCategory = categoryFilter === 'all' || s?.category === categoryFilter
     return matchSearch && matchStatus && matchCategory
-  })
+  }) || []
 
   async function handleStatus(id: string, status: Store['status']) {
-    await updateStoreStatus(id, status)
+    await updateStore(id, { status })
     fetchAllStores()
   }
 
@@ -49,11 +49,12 @@ export default function CeoStoresPage() {
     }
   }
 
+  const safeStores = allStores || []
   const counts = {
-    all: stores.length,
-    pending: stores.filter(s => s.status === 'pending').length,
-    active: stores.filter(s => s.status === 'active').length,
-    suspended: stores.filter(s => s.status === 'suspended').length,
+    all: safeStores.length,
+    pending: safeStores.filter((s: Store) => s.status === 'pending').length,
+    active: safeStores.filter((s: Store) => s.status === 'active').length,
+    suspended: safeStores.filter((s: Store) => s.status === 'suspended').length,
   }
 
   return (

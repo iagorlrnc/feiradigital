@@ -32,12 +32,18 @@ import CeoSettingsPage from "./pages/ceo/CeoSettingsPage"
 // Stores
 import { useAuthStore } from "./store/authStore"
 
+// Hooks
+import { useRefetch } from "./hooks/useRefetch"
+
 // Lib
 import { getSubdomain } from "./lib/subdomain"
 
 function AppRoutes() {
   const { init, user, initialized } = useAuthStore()
   const subdomain = getSubdomain()
+  
+  // Habilita auto-refetch ao focar na aba
+  useRefetch()
 
   useEffect(() => {
     init()

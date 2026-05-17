@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef, useEffect } from "react"
-import { ZoomIn, ZoomOut, Maximize, MousePointer2, Info, LayoutGrid, Map, Flame } from "lucide-react"
+import { ZoomIn, ZoomOut, Maximize, Info, LayoutGrid, Map } from "lucide-react"
 import type { Store } from "../lib/supabase"
 import { CATEGORY_ICONS } from "../lib/supabase"
 import LocationMap from "./LocationMap"
@@ -200,20 +200,6 @@ export default function FairMap({
     return result
   }, [])
 
-  function getCellState(x: number, y: number, sector: Sector | null) {
-    if (!sector) return "corridor"
-    const store = storeMap[`${x},${y}`]
-    if (store) {
-      if (store.id === currentStoreId) return "mine"
-      if (myStoreIds.includes(store.id)) return "my-other-store"
-      if (store.id === selectedStore?.id) return "selected"
-      return "occupied"
-    }
-    if (editingPosition?.x === x && editingPosition?.y === y)
-      return "editing"
-    return "empty"
-  }
-
   function handleCellClick(x: number, y: number, sector: Sector | null) {
     if (dragDistance.current > 5) return 
     if (!sector) return 
@@ -223,6 +209,66 @@ export default function FairMap({
     } else if (editable && onSelectPosition) {
       onSelectPosition(x, y)
     }
+  }
+
+  // Componente de célula memoizado para performance
+  const MapCell = ({ x, y, sector }: { x: number, y: number, sector: Sector | null }) => {
+    const store = storeMap[`${x},${y}`]
+    const icon = store ? CATEGORY_ICONS[store.category as keyof typeof CATEGORY_ICONS] : ""
+    
+    // Determine state
+    let state: "corridor" | "mine" | "my-other-store" | "selected" | "occupied" | "editing" | "empty" = "empty"
+    if (!sector) state = "corridor"
+    else if (store) {
+      if (store.id === currentStoreId) state = "mine"
+      else if (myStoreIds.includes(store.id)) state = "my-other-store"
+      else if (store.id === selectedStore?.id) state = "selected"
+      else state = "occupied"
+    } else if (editingPosition?.x === x && editingPosition?.y === y) {
+      state = "editing"
+    }
+
+    const isFlashActive = store?.offer_expires_at && new Date(store.offer_expires_at) > now
+
+    let cellClass = "relative rounded-md border border-transparent transition-all duration-300 flex items-center justify-center "
+    
+    if (state === "corridor") {
+      cellClass += "bg-transparent"
+    } else if (state === "mine") {
+      cellClass += "bg-black text-white border-black z-10 scale-125 shadow-2xl ring-4 ring-green-500/30 cursor-pointer"
+    } else if (state === "selected") {
+      cellClass += "bg-black text-white border-black z-10 scale-150 shadow-2xl ring-4 ring-palmas-blue/30 cursor-pointer"
+    } else if (state === "my-other-store") {
+      cellClass += "bg-gray-800 text-white border-gray-800 z-10 scale-110 shadow-lg ring-2 ring-gray-400/30 cursor-pointer"
+    } else if (state === "occupied") {
+      cellClass += "bg-black/90 hover:bg-black text-white border-black/90 cursor-pointer shadow-lg hover:scale-125 hover:z-20 z-10"
+    } else if (state === "editing") {
+      cellClass += "bg-palmas-blue text-white animate-pulse border-palmas-blue ring-4 ring-palmas-blue/20 cursor-pointer"
+    } else {
+      cellClass += `${sector?.color} border-black/5 cursor-pointer hover:scale-125 hover:z-20 hover:shadow-xl opacity-90 hover:opacity-100`
+    }
+
+    if (isFlashActive) {
+      cellClass += " ring-1 ring-orange-500 animate-pulse shadow-[0_0_20px_rgba(249,115,22,1)] z-40 scale-125 bg-orange-500 "
+    }
+
+    return (
+      <div
+        onClick={() => handleCellClick(x, y, sector)}
+        className={cellClass}
+        title={store?.name || sector?.name || "Corredor"}
+      >
+        {store?.logo_url ? (
+          <img src={store.logo_url} alt="" className="w-full h-full object-cover rounded-[3px]" />
+        ) : (
+          state !== "corridor" && (
+            <span className="text-[10px] leading-none transform transition-transform group-hover:scale-110">
+              {icon}
+            </span>
+          )
+        )}
+      </div>
+    )
   }
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -343,54 +389,9 @@ export default function FairMap({
                   gridTemplateRows: `repeat(${GRID_ROWS}, 24px)`
                 }}
               >
-                {cells.map(({ x, y, sector }) => {
-                  const state = getCellState(x, y, sector)
-                  const store = storeMap[`${x},${y}`]
-                  const icon = store ? CATEGORY_ICONS[store.category as keyof typeof CATEGORY_ICONS] : ""
-
-                  let cellClass = "relative rounded-md border border-transparent transition-all duration-300 flex items-center justify-center "
-                  
-                  if (state === "corridor") {
-                    cellClass += "bg-transparent"
-                  } else if (state === "mine") {
-                    cellClass += "bg-black text-white border-black z-10 scale-125 shadow-2xl ring-4 ring-green-500/30 cursor-pointer"
-                  } else if (state === "selected") {
-                    cellClass += "bg-black text-white border-black z-10 scale-150 shadow-2xl ring-4 ring-palmas-blue/30 cursor-pointer"
-                  } else if (state === "my-other-store") {
-                    cellClass += "bg-gray-800 text-white border-gray-800 z-10 scale-110 shadow-lg ring-2 ring-gray-400/30 cursor-pointer"
-                  } else if (state === "occupied") {
-                    cellClass += "bg-black/90 hover:bg-black text-white border-black/90 cursor-pointer shadow-lg hover:scale-125 hover:z-20 z-10"
-                  } else if (state === "editing") {
-                    cellClass += "bg-palmas-blue text-white animate-pulse border-palmas-blue ring-4 ring-palmas-blue/20 cursor-pointer"
-                  } else {
-                    cellClass += `${sector?.color} border-black/5 cursor-pointer hover:scale-125 hover:z-20 hover:shadow-xl opacity-90 hover:opacity-100`
-                  }
-
-                  const isFlashActive = store?.offer_expires_at && new Date(store.offer_expires_at) > now
-
-                  if (isFlashActive) {
-                    cellClass += " ring-1 ring-orange-500 animate-pulse shadow-[0_0_20px_rgba(249,115,22,1)] z-40 scale-125 bg-orange-500 "
-                  }
-
-                  return (
-                    <div
-                      key={`${x},${y}`}
-                      onClick={() => handleCellClick(x, y, sector)}
-                      className={cellClass}
-                      title={store?.name || sector?.name || "Corredor"}
-                    >
-                      {store?.logo_url ? (
-                        <img src={store.logo_url} alt="" className="w-full h-full object-cover rounded-[3px]" />
-                      ) : (
-                        state !== "corridor" && (
-                          <span className="text-[10px] leading-none transform transition-transform group-hover:scale-110">
-                            {icon}
-                          </span>
-                        )
-                      )}
-                    </div>
-                  )
-                })}
+                {cells.map(({ x, y, sector }) => (
+                  <MapCell key={`${x},${y}`} x={x} y={y} sector={sector} />
+                ))}
               </div>
             </div>
           </div>
